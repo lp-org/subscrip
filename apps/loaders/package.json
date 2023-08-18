@@ -1,0 +1,27 @@
+{
+    "name": "loaders",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node dist/index.js",
+        "build": "npm run clean && tsc -p tsconfig.json",
+        "watch":"tsc --watch",
+        "dev": "ts-node-dev --respawn -- src/index.ts",
+        "generate": "drizzle-kit generate:pg",
+        "push": "drizzle-kit push:pg",
+        "studio": "drizzle-kit studio",
+        "seed": "ts-node-dev src/drizzle-seed.ts"
+    },
+    "dependencies": {
+        "awilix": "^8.0.1",
+        "cross-spawn": "^7.0.3",
+        "ts-node-dev": "^2.0.0",
+        "turbowatch": "^2.29.4",
+        "winston": "^3.10.0",
+        "db":"*",
+        "server":"*"
+    },
+    "devDependencies": {
+        "@types/cross-spawn": "^6.0.2"
+    }
+}

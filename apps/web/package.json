@@ -9,16 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^13.4.1",
+    "@tanstack/react-query": "^4.32.6",
+    "admin-layout": "*",
+    "awilix": "^8.0.1",
+    "db": "*",
+    "next": "^13.4.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ui": "*"
+    "server": "*",
+    "ui": "*",
+    "sdk":"*"
   },
   "devDependencies": {
     "@types/node": "^17.0.12",
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
     "eslint-config-custom": "*",
+    "server": "*",
     "tsconfig": "*",
     "typescript": "^4.5.3"
   }

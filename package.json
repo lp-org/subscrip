@@ -6,14 +6,24 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint"
+    "start": "dotenv turbo run start",
+    "dev": "dotenv turbo run dev",
+    "watch": " turbo run watch",
+    "lint": "turbo run lint",
+    "generate": "dotenv turbo run generate",
+    "push": "dotenv turbo run push",
+    "seed": "dotenv turbo run seed",
+    "studio": "dotenv turbo run studio",
+    "clean": "turbo run clean"
   },
   "devDependencies": {
-    "eslint-config-custom": "*",
     "eslint": "7.32.0",
+    "eslint-config-custom": "*",
     "prettier": "^2.5.1",
     "turbo": "latest"
   },
-  "packageManager": "npm@8.19.4"
+  "packageManager": "npm@8.19.4",
+  "dependencies": {
+    "dotenv-cli": "^7.2.1"
+  }
 }

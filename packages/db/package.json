@@ -1,0 +1,21 @@
+{
+    "name": "db",
+    "main": "dist/index.js",
+    "source": "src/index.ts",
+    "types": "src/index.ts",
+    "scripts": {
+        "watch": "tsc --build --watch",
+        "build": "tsc --build"
+    },
+    "dependencies": {
+        "drizzle-kit": "^0.19.12",
+        "drizzle-orm": "^0.27.2",
+        "drizzle-zod": "^0.4.4",
+        "eslint": "^7.32.0",
+        "eslint-config-custom": "*",
+        "pg": "^8.11.2",
+        "postgres": "^3.3.5",
+        "tsconfig": "*",
+        "typescript": "^4.5.2"
+    }
+}

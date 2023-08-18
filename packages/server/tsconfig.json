@@ -1,0 +1,12 @@
+{
+    "extends": "tsconfig/base.json",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "rootDir": "src",
+      "noImplicitOverride": true,
+      "experimentalDecorators": true
+    },
+    "include": ["./src/**/*", "index.d.ts", "src/types"],
+    "exclude": ["dist", "build", "node_modules"]
+  }
+  
