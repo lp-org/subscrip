@@ -19,17 +19,24 @@ export default abstract class Model<
     this.db_ = db;
     this.table_ = table;
   }
+
+  withTransaction(db?: PgJsDatabaseType): this {
+    if (!db) {
+      return this;
+    }
+
+    const cloned = new (this.constructor as any)(this.db_.transaction);
+    cloned.transaction = db.transaction;
+
+    return cloned;
+  }
+
   async list(filter: FilterType) {
     const tableName = getTableName(this.table_) as keyof TTable["query"];
     // @ts-ignore
     const data = await this.db_.query[tableName].findMany(
       buildQuery(this.table_, filter)
     );
-
-    // const count = await this.db_
-    //   .select({ count: sql<number>`count(*)` })
-    //   .from(this.table_)
-    //   .where(and.apply(this, filter));
 
     return data;
   }

@@ -10,39 +10,95 @@ import {
   json,
   uniqueIndex,
   jsonb,
+  primaryKey,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { array, custom, number, object, string, z } from "zod";
 
-export const tenant = pgTable("tenant", {
-  id: serial("id").primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
+export const store = pgTable("store", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull().default("My Store"),
+  email: text("email"),
   url: text("url").unique(),
+  currency: text("currency").references(() => currency.code),
   active: boolean("active").default(true),
+  storeBillingId: uuid("store_billing_id").references(() => storebilling.id),
+  planId: uuid("plan_id").references(() => plan.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const storebilling = pgTable("store_billing", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  currency: text("currency").references(() => currency.code),
+  billingCycle: text("billing_cycle"),
+});
+
+export const plan = pgTable("plan", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  key: text("key").$type<"trial" | "starter">().default("trial"),
+  name: text("name").notNull(),
+  description: text("description"),
+  currency: text("currency").references(() => currency.code),
+  price: integer("price"),
 });
 
 export const user = pgTable("user", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   name: text("name"),
   email: text("email").notNull(),
-  password: text("password"),
+  password: text("password").notNull(),
   phone: text("phone"),
-  role: text("role").$type<"admin">(),
+  role_id: text("role").$type<"admin">(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const role = pgTable("role", {
-  id: serial("id").primaryKey(),
-  name: text("name"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const storeRelations = relations(store, ({ many, one }) => ({
+  user: many(user),
+  plan: one(plan),
+}));
+
+export const userRelations = relations(user, ({ many }) => ({
+  store: many(store),
+}));
+
+export const storeToUser = pgTable("store_to_user", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id),
+  isOwner: boolean("is_owner").default(true),
 });
 
+export const storeToUserRelations = relations(storeToUser, ({ one }) => ({
+  store: one(store, {
+    fields: [storeToUser.storeId],
+    references: [store.id],
+  }),
+  user: one(user, {
+    fields: [storeToUser.userId],
+    references: [user.id],
+  }),
+}));
+
+export const permissionToStoreUser = pgTable(
+  "permission_to_store_user",
+  {
+    storeUserId: uuid("store_user_id").references(() => storeToUser.id),
+    permissionId: uuid("permission_id").references(() => permission.id),
+  },
+  (t) => ({
+    pk: primaryKey(t.storeUserId, t.permissionId),
+  })
+);
+
 export const permission = pgTable("permission", {
+  id: uuid("id").defaultRandom().primaryKey(),
   key: text("key").notNull(),
   name: text("name").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -52,7 +108,7 @@ export const permission = pgTable("permission", {
 export const customer = pgTable(
   "customer",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").defaultRandom().primaryKey(),
     firstName: text("first_name"),
     lastName: text("last_name"),
     email: text("email").notNull(),
@@ -81,7 +137,7 @@ export const amenitiesType = [
 export type AmenitiesType = (typeof amenitiesType)[number];
 
 export const room = pgTable("room", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   shortDescription: text("short_description"),
@@ -105,7 +161,7 @@ export const roomRelations = relations(room, ({ many }) => ({
 }));
 
 export const pricing = pgTable("pricing", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   price: integer("price").default(0),
   dayOfWeek: text("day_of_week").$type<
     | "monday"
@@ -117,7 +173,7 @@ export const pricing = pgTable("pricing", {
     | "sunday"
   >(),
   date: date("date"),
-  roomId: integer("room_id").references(() => room.id),
+  roomId: uuid("room_id").references(() => room.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -126,13 +182,13 @@ export const booking = pgTable("booking", {
   id: uuid("id").defaultRandom().primaryKey(),
   checkInDate: date("check_in_date").notNull(),
   checkOutDate: date("check_out_date").notNull(),
-  roomId: integer("room_id").references(() => room.id),
+  roomId: uuid("room_id").references(() => room.id),
   guestCount: integer("guest_count"),
   totalAmount: integer("total_amount").default(0),
   status: text("status").$type<"pending" | "success" | "cancel">(),
   bookingNo: serial("booking_no"),
   additionalData: jsonb("additional_data"),
-  customerId: integer("customer_id").references(() => customer.id),
+  customerId: uuid("customer_id").references(() => customer.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -167,27 +223,8 @@ export const paymentRelations = relations(payment, ({ one }) => ({
   }),
 }));
 
-export const userSchema = createInsertSchema(user);
-
-export const roomSchema = createInsertSchema(room, {
-  name: string().nonempty(),
-  images: string().array(),
-  amenities: z.record(z.enum(amenitiesType), z.boolean()),
-});
-export const pricingSchema = createInsertSchema(pricing);
-export const customerSchema = createInsertSchema(customer);
-export const paymentSchema = createInsertSchema(payment);
-export const bookingSchema = createInsertSchema(booking);
-
-export const bookingFilterSchema = createInsertSchema(booking, {
-  checkInDate: z.string(),
-  checkOutDate: z.string(),
-  bookingNo: z.string(),
-  roomId: z.string(),
-});
-
 export const activityLog = pgTable("activity_log", {
-  id: serial("id"),
+  id: uuid("id"),
   event: text("event"),
   payload: json("payload"),
   userId: integer("user_id").notNull(),
@@ -195,14 +232,14 @@ export const activityLog = pgTable("activity_log", {
 });
 
 export const gallery = pgTable("gallery", {
-  id: serial("id"),
+  id: uuid("id"),
   fileKey: text("file_key"),
   fileType: text("file_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const setting = pgTable("setting", {
-  id: serial("id"),
+  id: uuid("id"),
   name: text("name"),
   email: text("email"),
   logo: text("logo"),
@@ -225,12 +262,8 @@ export const currency = pgTable("currency", {
   name: text("name"),
 });
 
-export const currencySchema = createInsertSchema(currency);
-
-export const settingSchema = createInsertSchema(setting);
-
 export const contactUs = pgTable("contact_us", {
-  id: serial("id"),
+  id: uuid("id"),
   email: text("email"),
   name: text("name"),
   message: text("message"),
@@ -238,7 +271,7 @@ export const contactUs = pgTable("contact_us", {
 });
 
 export const batchJob = pgTable("batch_job", {
-  id: serial("id"),
+  id: uuid("id"),
   type: text("type"),
   context: jsonb("context"),
   result: jsonb("result"),
@@ -248,13 +281,10 @@ export const batchJob = pgTable("batch_job", {
   failedAt: timestamp("failed_at"),
 });
 
-export const contactUsSchema = createInsertSchema(contactUs);
-
 export const stagedJob = pgTable("staged_job", {
-  id: serial("id"),
+  id: uuid("id"),
   eventName: text("event_name").notNull(),
   data: jsonb("data"),
   options: jsonb("options").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
-export const stagedJobSchema = createInsertSchema(stagedJob);

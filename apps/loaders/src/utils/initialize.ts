@@ -19,7 +19,9 @@ function initialize() {
   const defaultContainer = createContainer();
 
   defaultContainer.register({
-    db: asFunction(() => connectDatabase(process.env.DATABASE_URL as string)),
+    db: asFunction(() =>
+      connectDatabase(process.env.DATABASE_URL as string)
+    ).singleton(),
     eventBusModuleService: asClass(LocalEventBusService),
   });
   // register API

@@ -85,7 +85,9 @@ class S3Service extends AbstractFileService {
     const result = await client.send(params);
 
     return {
+      //@ts-ignore
       url: result.Location,
+      //@ts-ignore
       key: result.Key,
     };
   }
@@ -140,7 +142,7 @@ class S3Service extends AbstractFileService {
       Key: `${fileData.fileKey}`,
     });
     const item = await client.send(params);
-
+    //@ts-ignore
     return item.Body!.transformToWebStream();
   }
 

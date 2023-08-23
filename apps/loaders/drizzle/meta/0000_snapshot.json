@@ -1,111 +1,11 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "3143dd8d-d5b9-4c1e-ac38-4f3e4e6a02bd",
+  "id": "91c91da0-5cbd-4a69-91be-2738ca0e6fe2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "activity_log": {
-      "name": "activity_log",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event": {
-          "name": "event",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payload": {
-          "name": "payload",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "batch_job": {
-      "name": "batch_job",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "context": {
-          "name": "context",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "result": {
-          "name": "result",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "start_at": {
-          "name": "start_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "completed_at": {
-          "name": "completed_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "failed_at": {
-          "name": "failed_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "booking": {
-      "name": "booking",
+    "store": {
+      "name": "store",
       "schema": "",
       "columns": {
         "id": {
@@ -115,58 +15,47 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "check_in_date": {
-          "name": "check_in_date",
-          "type": "date",
+        "name": {
+          "name": "name",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'My Store'"
         },
-        "check_out_date": {
-          "name": "check_out_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "room_id": {
-          "name": "room_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "guest_count": {
-          "name": "guest_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_amount": {
-          "name": "total_amount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "status": {
-          "name": "status",
+        "email": {
+          "name": "email",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "booking_no": {
-          "name": "booking_no",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "additional_data": {
-          "name": "additional_data",
-          "type": "jsonb",
+        "url": {
+          "name": "url",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "customer_id": {
-          "name": "customer_id",
-          "type": "integer",
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "store_billing_id": {
+          "name": "store_billing_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -187,12 +76,25 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "booking_room_id_room_id_fk": {
-          "name": "booking_room_id_room_id_fk",
-          "tableFrom": "booking",
-          "tableTo": "room",
+        "store_currency_currency_code_fk": {
+          "name": "store_currency_currency_code_fk",
+          "tableFrom": "store",
+          "tableTo": "currency",
           "columnsFrom": [
-            "room_id"
+            "currency"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "store_store_billing_id_store_billing_id_fk": {
+          "name": "store_store_billing_id_store_billing_id_fk",
+          "tableFrom": "store",
+          "tableTo": "store_billing",
+          "columnsFrom": [
+            "store_billing_id"
           ],
           "columnsTo": [
             "id"
@@ -200,12 +102,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "booking_customer_id_customer_id_fk": {
-          "name": "booking_customer_id_customer_id_fk",
-          "tableFrom": "booking",
-          "tableTo": "customer",
+        "store_plan_id_plan_id_fk": {
+          "name": "store_plan_id_plan_id_fk",
+          "tableFrom": "store",
+          "tableTo": "plan",
           "columnsFrom": [
-            "customer_id"
+            "plan_id"
           ],
           "columnsTo": [
             "id"
@@ -215,23 +117,131 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "store_url_unique": {
+          "name": "store_url_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "url"
+          ]
+        }
+      }
     },
-    "contact_us": {
-      "name": "contact_us",
+    "store_billing": {
+      "name": "store_billing",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "email": {
-          "name": "email",
+        "currency": {
+          "name": "currency",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "billing_cycle": {
+          "name": "billing_cycle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "store_billing_currency_currency_code_fk": {
+          "name": "store_billing_currency_currency_code_fk",
+          "tableFrom": "store_billing",
+          "tableTo": "currency",
+          "columnsFrom": [
+            "currency"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "plan": {
+      "name": "plan",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'trial'"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "plan_currency_currency_code_fk": {
+          "name": "plan_currency_currency_code_fk",
+          "tableFrom": "plan",
+          "tableTo": "currency",
+          "columnsFrom": [
+            "currency"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
@@ -239,14 +249,46 @@
           "primaryKey": false,
           "notNull": false
         },
-        "message": {
-          "name": "message",
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
         "created_at": {
           "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
@@ -258,33 +300,161 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "currency": {
-      "name": "currency",
+    "store_to_user": {
+      "name": "store_to_user",
       "schema": "",
       "columns": {
-        "code": {
-          "name": "code",
-          "type": "text",
+        "id": {
+          "name": "id",
+          "type": "uuid",
           "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "store_id": {
+          "name": "store_id",
+          "type": "uuid",
+          "primaryKey": false,
           "notNull": true
         },
-        "symbol": {
-          "name": "symbol",
-          "type": "text",
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_owner": {
+          "name": "is_owner",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "store_to_user_store_id_store_id_fk": {
+          "name": "store_to_user_store_id_store_id_fk",
+          "tableFrom": "store_to_user",
+          "tableTo": "store",
+          "columnsFrom": [
+            "store_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "store_to_user_user_id_user_id_fk": {
+          "name": "store_to_user_user_id_user_id_fk",
+          "tableFrom": "store_to_user",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "permission_to_store_user": {
+      "name": "permission_to_store_user",
+      "schema": "",
+      "columns": {
+        "store_user_id": {
+          "name": "store_user_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "symbol_native": {
-          "name": "symbol_native",
-          "type": "text",
+        "permission_id": {
+          "name": "permission_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "permission_to_store_user_store_user_id_store_to_user_id_fk": {
+          "name": "permission_to_store_user_store_user_id_store_to_user_id_fk",
+          "tableFrom": "permission_to_store_user",
+          "tableTo": "store_to_user",
+          "columnsFrom": [
+            "store_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "permission_to_store_user_permission_id_permission_id_fk": {
+          "name": "permission_to_store_user_permission_id_permission_id_fk",
+          "tableFrom": "permission_to_store_user",
+          "tableTo": "permission",
+          "columnsFrom": [
+            "permission_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "permission_to_store_user_store_user_id_permission_id": {
+          "name": "permission_to_store_user_store_user_id_permission_id",
+          "columns": [
+            "store_user_id",
+            "permission_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "permission": {
+      "name": "permission",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "rank": {
+          "name": "rank",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -298,9 +468,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "first_name": {
           "name": "first_name",
@@ -360,43 +531,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "gallery": {
-      "name": "gallery",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "file_key": {
-          "name": "file_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "file_type": {
-          "name": "file_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "payment": {
-      "name": "payment",
+    "room": {
+      "name": "room",
       "schema": "",
       "columns": {
         "id": {
@@ -405,156 +541,6 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
-        },
-        "amount": {
-          "name": "amount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "currency": {
-          "name": "currency",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "booking_id": {
-          "name": "booking_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reference": {
-          "name": "reference",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "payment_booking_id_booking_id_fk": {
-          "name": "payment_booking_id_booking_id_fk",
-          "tableFrom": "payment",
-          "tableTo": "booking",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "pricing": {
-      "name": "pricing",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "price": {
-          "name": "price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "day_of_week": {
-          "name": "day_of_week",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "date": {
-          "name": "date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "room_id": {
-          "name": "room_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "pricing_room_id_room_id_fk": {
-          "name": "pricing_room_id_room_id_fk",
-          "tableFrom": "pricing",
-          "tableTo": "room",
-          "columnsFrom": [
-            "room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "room": {
-      "name": "room",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
         },
         "name": {
           "name": "name",
@@ -642,15 +628,356 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "pricing": {
+      "name": "pricing",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "day_of_week": {
+          "name": "day_of_week",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pricing_room_id_room_id_fk": {
+          "name": "pricing_room_id_room_id_fk",
+          "tableFrom": "pricing",
+          "tableTo": "room",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "booking": {
+      "name": "booking",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "check_in_date": {
+          "name": "check_in_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "check_out_date": {
+          "name": "check_out_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "guest_count": {
+          "name": "guest_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "booking_no": {
+          "name": "booking_no",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "additional_data": {
+          "name": "additional_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "booking_room_id_room_id_fk": {
+          "name": "booking_room_id_room_id_fk",
+          "tableFrom": "booking",
+          "tableTo": "room",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "booking_customer_id_customer_id_fk": {
+          "name": "booking_customer_id_customer_id_fk",
+          "tableFrom": "booking",
+          "tableTo": "customer",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "payment": {
+      "name": "payment",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "booking_id": {
+          "name": "booking_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reference": {
+          "name": "reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "payment_booking_id_booking_id_fk": {
+          "name": "payment_booking_id_booking_id_fk",
+          "tableFrom": "payment",
+          "tableTo": "booking",
+          "columnsFrom": [
+            "booking_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "activity_log": {
+      "name": "activity_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event": {
+          "name": "event",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "gallery": {
+      "name": "gallery",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_key": {
+          "name": "file_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_type": {
+          "name": "file_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "setting": {
       "name": "setting",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -739,19 +1066,47 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "user": {
-      "name": "user",
+    "currency": {
+      "name": "currency",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "code": {
+          "name": "code",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
+        },
+        "symbol": {
+          "name": "symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "symbol_native": {
+          "name": "symbol_native",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "name": {
           "name": "name",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "contact_us": {
+      "name": "contact_us",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -759,32 +1114,66 @@
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "password": {
-          "name": "password",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "phone": {
-          "name": "phone",
+        "message": {
+          "name": "message",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "active": {
-          "name": "active",
-          "type": "boolean",
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "default": true
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "batch_job": {
+      "name": "batch_job",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "context": {
+          "name": "context",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result": {
+          "name": "result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_at": {
+          "name": "start_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -793,23 +1182,62 @@
           "notNull": false,
           "default": "now()"
         },
-        "updated_at": {
-          "name": "updated_at",
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failed_at": {
+          "name": "failed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "staged_job": {
+      "name": "staged_job",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_name": {
+          "name": "event_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "options": {
+          "name": "options",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         }
       },
-      "indexes": {
-        "email_user": {
-          "name": "email_user",
-          "columns": [
-            "email"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

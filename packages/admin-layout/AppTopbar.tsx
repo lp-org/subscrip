@@ -10,19 +10,38 @@ import React, {
 } from "react";
 import { AppTopbarRef } from "./types/types";
 import { LayoutContext } from "./context/layoutcontext";
-
+import { Menu } from "primereact/menu";
+import AdminApi from "sdk/src/api/admin-api";
+import { useToast } from "ui";
+import { useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
   const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } =
     useContext(LayoutContext);
   const menubuttonRef = useRef(null);
   const topbarmenuRef = useRef(null);
   const topbarmenubuttonRef = useRef(null);
-
+  const profileMenu = useRef(null);
+  const router = useRouter();
   useImperativeHandle(ref, () => ({
     menubutton: menubuttonRef.current,
     topbarmenu: topbarmenuRef.current,
     topbarmenubutton: topbarmenubuttonRef.current,
   }));
+  const { showToast } = useToast();
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: AdminApi.auth.logout,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["me"]);
+      showToast({
+        severity: "info",
+        detail: "Logout",
+      });
+      router.refresh();
+    },
+  });
+  const handleLogout = () => mutate();
 
   return (
     <div className="layout-topbar">
@@ -66,16 +85,36 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
           <i className="pi pi-calendar"></i>
           <span>Calendar</span>
         </button>
-        <button type="button" className="p-link layout-topbar-button">
+        <button
+          type="button"
+          className="p-link layout-topbar-button"
+          onClick={(e) => profileMenu.current.toggle(e)}
+        >
           <i className="pi pi-user"></i>
           <span>Profile</span>
         </button>
+        <Menu
+          model={[
+            {
+              label: "Logout",
+              command: handleLogout,
+            },
+          ]}
+          popup
+          ref={profileMenu}
+          id="popup_menu_right"
+          popupAlignment="right"
+        />
         <Link href="/documentation">
           <button type="button" className="p-link layout-topbar-button">
             <i className="pi pi-cog"></i>
             <span>Settings</span>
           </button>
         </Link>
+
+        <button type="button" className="p-link layout-topbar-button md:hidden">
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   );

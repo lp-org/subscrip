@@ -1,3 +1,4 @@
+"use client";
 import { Metadata } from "next";
 import { LayoutProvider } from "admin-layout/context/layoutcontext";
 
@@ -8,7 +9,9 @@ import "admin-layout/styles/layout.scss";
 import Layout from "admin-layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Providers from "../utils/provider";
-
+import { useToast } from "ui";
+import Toast from "ui/Toast";
+import "./../styles/index.scss";
 interface RootLayoutProps {
   children: React.ReactNode;
 }
@@ -46,7 +49,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body>
         <Providers>
-          <Layout> {children}</Layout>
+          {children}
+          <Toast />
         </Providers>
       </body>
     </html>

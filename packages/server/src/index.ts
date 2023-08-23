@@ -11,11 +11,16 @@ import cors from "cors";
 export * from "./services";
 
 export * from "./plugin-service";
-import Express from "express";
+import Express, { json } from "express";
 import { createLogger } from "winston";
 
 import { loadControllers, scopePerRequest } from "awilix-express";
 import { errorHandlerMiddleware } from "./middleware/error-handler";
+import passport from "./middleware/passport";
+import session from "./middleware/session";
+import auth from "./middleware/auth";
+import cookieParser from "cookie-parser";
+import { loggerInstance } from "./utils/logger";
 export function registerService(container: AwilixContainer) {
   const corePath = "./services/*.js";
   const coreFull = path.join(__dirname, corePath);
@@ -43,17 +48,36 @@ export function registerRoutes(container: AwilixContainer) {
   // const coreFull = path.join(__dirname, corePath);
   app.use(
     cors({
-      origin: "http://localhost:3002",
+      origin: true,
       credentials: true,
     })
   );
-
+  app.use(cookieParser());
   app.use(scopePerRequest(container));
+  session({ app });
+  passport({ app, container });
 
+  app.use(json());
   // Loads all controllers in the `routes` folder
   // relative to the current working directory.
   // This is a glob pattern.
-  app.use("/admin", loadControllers("./routes/admin/*.js", { cwd: __dirname }));
+  app.use((req, res, next) => {
+    console.log("register user");
+    req.container.register({
+      currentUser: asFunction(() => req.user).scoped(),
+    });
+    next();
+  });
+  app.use(
+    "/admin",
+    loadControllers("./routes/admin-public/*.js", { cwd: __dirname })
+  );
+
+  app.use(
+    "/admin",
+    auth(),
+    loadControllers("./routes/admin/*.js", { cwd: __dirname })
+  );
 
   app.use(errorHandlerMiddleware());
   app.listen(5000);
@@ -81,7 +105,7 @@ export function registerSubscriber(container: AwilixContainer) {
 }
 
 export function registerLogger(container: AwilixContainer) {
-  const logger = createLogger();
+  const logger = loggerInstance;
 
   container.register({
     logger: asValue(logger),

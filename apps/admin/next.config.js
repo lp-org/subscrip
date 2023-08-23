@@ -2,7 +2,7 @@
 module.exports = {
   reactStrictMode: true,
   experimental: {
-    serverComponentsExternalPackages: ["awilix"],
+    serverComponentsExternalPackages: ["awilix", "react-hook-form"],
   },
   transpilePackages: ["ui"],
 };

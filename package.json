@@ -11,6 +11,7 @@
     "watch": " turbo run watch",
     "lint": "turbo run lint",
     "generate": "dotenv turbo run generate",
+    "drop": "dotenv turbo run drop",
     "push": "dotenv turbo run push",
     "seed": "dotenv turbo run seed",
     "studio": "dotenv turbo run studio",
@@ -24,6 +25,7 @@
   },
   "packageManager": "npm@8.19.4",
   "dependencies": {
+    "clsx": "^2.0.0",
     "dotenv-cli": "^7.2.1"
   }
 }

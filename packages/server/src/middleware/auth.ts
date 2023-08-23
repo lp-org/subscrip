@@ -1,16 +1,13 @@
-import { asValue } from "awilix";
-import { NextFunction, Request, Response } from "express";
+import { asFunction, asValue } from "awilix";
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import passport from "passport";
 
-export const authMiddleware =
-  () => (req: Request, res: Response, next: NextFunction) => {
-    // We want a new scope for each request!
-
-    // The `TodosService` needs `currentUser`
-
+export default (): RequestHandler => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    passport.authenticate(["admin-jwt"], { session: false })(req, res, next);
+    console.log("register user 2");
     req.container.register({
-      currentUser: asValue(req.headers.userid), // from auth middleware... IMAGINATION!! :D
+      currentUser: asFunction(() => req.user).scoped(),
     });
-    const userid: string = req.headers.userid as string;
-    req.user = userid;
-    return next();
   };
+};

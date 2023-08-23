@@ -8,6 +8,7 @@
         "watch":"tsc --watch",
         "dev": "ts-node-dev --respawn -- src/index.ts",
         "generate": "drizzle-kit generate:pg",
+        "drop": "drizzle-kit drop",
         "push": "drizzle-kit push:pg",
         "studio": "drizzle-kit studio",
         "seed": "ts-node-dev src/drizzle-seed.ts"

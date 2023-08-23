@@ -200,6 +200,7 @@ export default class EventBusService {
 
       await this.eventBusModuleService_.emit(eventsData).then(async () => {
         return await this.db_.delete(stagedJob).where(
+          // @ts-ignore
           inArray(
             stagedJob.id,
             jobs.map((j) => j.id)
