@@ -12,8 +12,7 @@ export * from "./services";
 
 export * from "./plugin-service";
 import Express, { json } from "express";
-import { createLogger } from "winston";
-
+export * from "./utils";
 import { loadControllers, scopePerRequest } from "awilix-express";
 import { errorHandlerMiddleware } from "./middleware/error-handler";
 import passport from "./middleware/passport";
@@ -21,6 +20,8 @@ import session from "./middleware/session";
 import auth from "./middleware/auth";
 import cookieParser from "cookie-parser";
 import { loggerInstance } from "./utils/logger";
+import StoreService from "./services/StoreService";
+
 export function registerService(container: AwilixContainer) {
   const corePath = "./services/*.js";
   const coreFull = path.join(__dirname, corePath);
@@ -62,10 +63,27 @@ export function registerRoutes(container: AwilixContainer) {
   // relative to the current working directory.
   // This is a glob pattern.
   app.use((req, res, next) => {
-    console.log("register user");
     req.container.register({
       currentUser: asFunction(() => req.user).scoped(),
     });
+
+    req.container.register({
+      currentStore: asFunction(async () => {
+        if (req.user && req.user.userId) {
+          const storeService: StoreService =
+            req.container.resolve("storeService");
+          const storeId = req.headers.storeid;
+
+          if (storeId) {
+            const currentStore = await storeService.get(storeId as string);
+            if (!currentStore) throw new Error("Store not exist");
+            return currentStore;
+          }
+        }
+        return undefined;
+      }).scoped(),
+    });
+
     next();
   });
   app.use(
@@ -109,5 +127,17 @@ export function registerLogger(container: AwilixContainer) {
 
   container.register({
     logger: asValue(logger),
+  });
+}
+
+export function registerSeeder(container: AwilixContainer) {
+  const corePath = "./seeders/*.js";
+  const coreFull = path.join(__dirname, corePath);
+
+  const core = glob.sync(coreFull, { cwd: __dirname });
+  core.forEach((fn) => {
+    const loaded = require(fn).default;
+
+    container.build(asFunction((cradle) => new loaded(cradle)).singleton());
   });
 }

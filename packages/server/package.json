@@ -1,7 +1,6 @@
 {
     "name": "server",
-    "main": "dist/index.js",
-    "source": "src/index.ts",
+    "main": "dist/index.js",   
     "types": "src/index.ts",
     "scripts": {
         "clean": "rm -rf dist",
@@ -21,7 +20,7 @@
         "cors": "^2.8.5",
         "db": "*",
         "drizzle-kit": "^0.19.12",
-        "drizzle-orm": "^0.27.2",
+        "drizzle-orm": "^0.28.5",
         "drizzle-zod": "^0.4.4",
         "eslint": "^7.32.0",
         "eslint-config-custom": "*",

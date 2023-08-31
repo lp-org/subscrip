@@ -8,6 +8,7 @@ export const errorHandlerMiddleware =
     logger.info(err);
     if (err instanceof ZodError) {
       res.status(400).json({ error: "invalid input", message: err.issues });
+      return;
     }
 
     res.status(400).json({ error: "Error", message: err.message });

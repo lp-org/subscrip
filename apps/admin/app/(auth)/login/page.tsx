@@ -1,17 +1,14 @@
 "use client";
-import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@tanstack/react-query";
-import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import AdminApi from "sdk/src/api/admin-api";
-import { getErrorMessage, useToast } from "ui";
+import { useToast } from "ui";
 import InputError from "ui/InputError";
+import { useRequest } from "../../../utils/adminClient";
 
 type LoginFormProps = {
   email: string;
@@ -24,8 +21,9 @@ const Login = () => {
       defaultValues: { email: "", password: "" },
     });
   const { push } = useRouter();
+  const { adminClient } = useRequest();
   const { mutate } = useMutation({
-    mutationFn: AdminApi.auth.login,
+    mutationFn: adminClient.auth.login,
     onSuccess: () => {
       push("/");
     },

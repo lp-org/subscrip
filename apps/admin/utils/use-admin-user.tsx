@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import AdminApi from "sdk/src/api/admin-api";
+import { useRequest } from "./adminClient";
 const useAdminUser = () => {
   const router = useRouter();
+  const { adminClient } = useRequest();
   const data = useQuery({
     queryKey: ["me"],
-    queryFn: AdminApi.auth.getSession,
-    onError() {
-      router.push("/login");
+    queryFn: adminClient.auth.getSession,
+    onError: (err: any) => {
+      if (err?.response?.status === 401) router.push("/login");
     },
     retry: false,
   });

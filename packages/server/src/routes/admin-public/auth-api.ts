@@ -73,7 +73,9 @@ export default class CreateUserApi {
   async getSession(req: Request, res: Response) {
     if (req.user && req.user.userId) {
       const user = await this.userService_.get(req.user.userId);
-
+      if (!user) {
+        res.sendStatus(401);
+      }
       res.json(user);
     } else {
       res.sendStatus(401);

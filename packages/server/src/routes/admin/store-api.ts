@@ -1,4 +1,4 @@
-import { GET, route } from "awilix-express";
+import { GET, POST, route } from "awilix-express";
 import { Request, Response } from "express";
 import StoreService from "../../services/StoreService";
 
@@ -17,6 +17,13 @@ export default class StoreApi {
   @GET()
   async list(req: Request, res: Response) {
     const store = await this.storeService_.list();
-    res.json({ store });
+    res.json(store);
+  }
+
+  @route("/")
+  @POST()
+  async create(req: Request, res: Response) {
+    const store = await this.storeService_.create(req.body.name);
+    res.json(store);
   }
 }

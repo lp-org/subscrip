@@ -4,28 +4,32 @@ import {
   User,
   activityLog,
   setting,
+  store,
   storeToUser,
   user,
   userSchema,
 } from "db";
 import Model from "../interfaces/model";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { InferModel, getTableName, eq } from "drizzle-orm";
+import { InferModel, getTableName, eq, and } from "drizzle-orm";
 import { RESOLVER } from "awilix";
 import Scrypt from "scrypt-kdf";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
   currentUser: number;
+  currentStore: any;
 };
 
 class UserService extends Model<typeof user> {
   static [RESOLVER] = {};
   protected override readonly db_: PgJsDatabaseType;
   protected readonly currentUser_: number;
-  constructor({ db, currentUser }: InjectedDependencies) {
+  protected readonly currentStore_: any;
+  constructor({ db, currentUser, currentStore }: InjectedDependencies) {
     super(arguments[0], user);
     this.db_ = db;
     this.currentUser_ = currentUser;
+    this.currentStore_ = currentStore;
   }
 
   async create(data: NewUser, password: string) {
@@ -57,14 +61,28 @@ class UserService extends Model<typeof user> {
 
   async get(userId: string) {
     return await this.db_.transaction(async (tx) => {
-      const data = await tx
+      const currentStore = await this.currentStore_;
+      let data = await tx
         .select({
           id: user.id,
           email: user.email,
           createdAt: user.createdAt,
+
+          store: {
+            ...(currentStore ? { storeUserId: storeToUser.id } : {}),
+            ...(currentStore ? { id: storeToUser.storeId } : {}),
+            ...(currentStore ? { name: store.name } : {}),
+          },
         })
         .from(user)
-        .where(eq(user.id, userId));
+        .leftJoin(storeToUser, eq(storeToUser.userId, user.id))
+        .leftJoin(store, eq(storeToUser.storeId, store.id))
+        .where(
+          and(
+            eq(user.id, userId),
+            currentStore && eq(storeToUser.storeId, currentStore.storeId)
+          )
+        );
 
       return data[0];
     });
@@ -72,10 +90,13 @@ class UserService extends Model<typeof user> {
 
   override async list() {
     const data = await this.db_
-      .select()
+      .select({
+        id: storeToUser.id,
+        email: user.email,
+      })
       .from(user)
       .leftJoin(storeToUser, eq(storeToUser.userId, user.id))
-      .where(eq(storeToUser.storeId, "1"));
+      .where(eq(storeToUser.storeId, (await this.currentStore_).storeId));
 
     return data;
   }

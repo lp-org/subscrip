@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "91c91da0-5cbd-4a69-91be-2738ca0e6fe2",
+  "id": "2200f06c-0f65-4cf4-822c-64134c4f169d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "store": {
@@ -363,63 +363,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "permission_to_store_user": {
-      "name": "permission_to_store_user",
-      "schema": "",
-      "columns": {
-        "store_user_id": {
-          "name": "store_user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "permission_id": {
-          "name": "permission_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "permission_to_store_user_store_user_id_store_to_user_id_fk": {
-          "name": "permission_to_store_user_store_user_id_store_to_user_id_fk",
-          "tableFrom": "permission_to_store_user",
-          "tableTo": "store_to_user",
-          "columnsFrom": [
-            "store_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "permission_to_store_user_permission_id_permission_id_fk": {
-          "name": "permission_to_store_user_permission_id_permission_id_fk",
-          "tableFrom": "permission_to_store_user",
-          "tableTo": "permission",
-          "columnsFrom": [
-            "permission_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "permission_to_store_user_store_user_id_permission_id": {
-          "name": "permission_to_store_user_store_user_id_permission_id",
-          "columns": [
-            "store_user_id",
-            "permission_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    },
     "permission": {
       "name": "permission",
       "schema": "",
@@ -608,6 +551,12 @@
           "notNull": false,
           "default": false
         },
+        "store_id": {
+          "name": "store_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -624,7 +573,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "room_store_id_store_id_fk": {
+          "name": "room_store_id_store_id_fk",
+          "tableFrom": "room",
+          "tableTo": "store",
+          "columnsFrom": [
+            "store_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },

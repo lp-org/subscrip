@@ -1,6 +1,6 @@
 import { PgJsDatabaseType, User, store, storeToUser, user } from "db";
 import { RESOLVER } from "awilix";
-import { InferModel, eq } from "drizzle-orm";
+import { InferModel, and, eq } from "drizzle-orm";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
   currentUser: any;
@@ -28,6 +28,24 @@ export default class StoreService {
       return storeUser.map(({ store }) => store);
     });
   }
+  async get(storeId: string) {
+    return await this.db_.transaction(async (tx) => {
+      const storeUser = await tx
+        .select({
+          storeId: store.id,
+          storeUserId: storeToUser.id,
+        })
+        .from(store)
+        .innerJoin(storeToUser, eq(storeToUser.storeId, store.id))
+        .where(
+          and(
+            eq(storeToUser.userId, this.currentUser_.userId),
+            eq(storeToUser.storeId, storeId)
+          )
+        );
+      return storeUser[0];
+    });
+  }
 
   async create(name: string) {
     return await this.db_.transaction(async (tx) => {
@@ -43,9 +61,10 @@ export default class StoreService {
         .insert(storeToUser)
         .values({
           storeId: newStore[0].id,
-          userId: this.currentUser_.id,
+          userId: this.currentUser_.userId,
         })
         .returning({
+          id: storeToUser.storeId,
           storeUserId: storeToUser.id,
         });
       return storeUser[0];

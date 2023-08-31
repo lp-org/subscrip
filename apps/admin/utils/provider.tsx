@@ -2,7 +2,7 @@
 
 import React from "react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { LayoutProvider } from "admin-layout/context/layoutcontext";
+import { LayoutProvider } from "../components/admin-layout/context/layoutcontext";
 
 function Providers({ children }: React.PropsWithChildren) {
   const [client] = React.useState(new QueryClient());

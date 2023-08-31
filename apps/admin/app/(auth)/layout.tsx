@@ -23,7 +23,7 @@ export default function RootLayout({
     }
   }, [data, router.push]);
 
-  if (!data && !isLoading) {
+  if (!isLoading) {
     return (
       <div className="layout-wrapper">
         <div className="layout-main-container">{children}</div>

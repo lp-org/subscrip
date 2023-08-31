@@ -9,6 +9,7 @@ import { connectDatabase } from "db";
 import {
   registerLogger,
   registerRoutes,
+  registerSeeder,
   registerService,
   registerSubscriber,
 } from "server";
@@ -31,6 +32,8 @@ function initialize() {
   registerLogger(defaultContainer);
 
   registerSubscriber(defaultContainer);
+
+  registerSeeder(defaultContainer);
   // customize service
   defaultContainer.register("fileService", asClass(LocalFileService));
   return defaultContainer;

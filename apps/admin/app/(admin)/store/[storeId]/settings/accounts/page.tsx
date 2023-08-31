@@ -5,12 +5,14 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { SplitButton } from "primereact/splitbutton";
 import React from "react";
-import AdminApi from "sdk/src/api/admin-api";
 import PageHeader from "ui/PageHeader";
+import adminClient, { useRequest } from "../../../../../../utils/adminClient";
 
 const UserAndPermission = () => {
+  const { adminClient } = useRequest();
+
   const { data } = useQuery({
-    queryFn: AdminApi.user.get,
+    queryFn: adminClient.user.get,
   });
   const users = data?.data;
   return (

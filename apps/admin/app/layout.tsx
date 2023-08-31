@@ -1,22 +1,18 @@
 "use client";
 import { Metadata } from "next";
-import { LayoutProvider } from "admin-layout/context/layoutcontext";
 
 import "primereact/resources/primereact.css";
 import "primeflex/primeflex.css";
 import "primeicons/primeicons.css";
-import "admin-layout/styles/layout.scss";
-import Layout from "admin-layout";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "./../components/admin-layout/styles/layout.scss";
+
 import Providers from "../utils/provider";
-import { useToast } from "ui";
 import Toast from "ui/Toast";
 import "./../styles/index.scss";
 interface RootLayoutProps {
   children: React.ReactNode;
 }
-// Create a client
-const queryClient = new QueryClient();
+
 export const metadata: Metadata = {
   title: "Sakai by PrimeReact | Free Admin Template for NextJS",
   description:

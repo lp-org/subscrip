@@ -56,6 +56,7 @@ export const user = pgTable("user", {
 });
 
 export const storeRelations = relations(store, ({ many, one }) => ({
+  room: many(room),
   user: many(user),
   plan: one(plan),
 }));
@@ -86,16 +87,16 @@ export const storeToUserRelations = relations(storeToUser, ({ one }) => ({
   }),
 }));
 
-export const permissionToStoreUser = pgTable(
-  "permission_to_store_user",
-  {
-    storeUserId: uuid("store_user_id").references(() => storeToUser.id),
-    permissionId: uuid("permission_id").references(() => permission.id),
-  },
-  (t) => ({
-    pk: primaryKey(t.storeUserId, t.permissionId),
-  })
-);
+// export const permissionToStoreUser = pgTable(
+//   "permission_to_store_user",
+//   {
+//     storeUserId: uuid("store_user_id").references(() => storeToUser.id),
+//     permissionId: uuid("permission_id").references(() => permission.id),
+//   },
+//   (t) => ({
+//     pk: primaryKey(t.storeUserId, t.permissionId),
+//   })
+// );
 
 export const permission = pgTable("permission", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -151,13 +152,15 @@ export const room = pgTable("room", {
   quantity: integer("quantity").default(0),
   maximumOccupancy: integer("maximum_occupancy").default(0),
   published: boolean("published").default(false),
+  storeId: uuid("store_id").references(() => store.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const roomRelations = relations(room, ({ many }) => ({
+export const roomRelations = relations(room, ({ many, one }) => ({
   pricings: many(pricing),
   bookings: many(booking),
+  store: one(store, { fields: [room.storeId], references: [store.id] }),
 }));
 
 export const pricing = pgTable("pricing", {

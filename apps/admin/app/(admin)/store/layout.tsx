@@ -1,5 +1,5 @@
 "use client";
-import Layout from "admin-layout";
+
 import useAdminUser from "../../../utils/use-admin-user";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

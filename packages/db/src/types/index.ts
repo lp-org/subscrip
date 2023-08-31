@@ -16,11 +16,9 @@ import {
 } from "../schema";
 import { InferModel } from "drizzle-orm";
 
-export type User = InferModel<typeof user, "select">;
-export type NewUser = Omit<InferModel<typeof user, "insert">, "id">;
+export type User = typeof user.$inferSelect;
+export type NewUser = Omit<typeof user.$inferInsert, "id">;
 
-export type Store = InferModel<typeof store, "select">;
-export type NewStore = Omit<InferModel<typeof store, "insert">, "id">;
 export const roomSchema = createInsertSchema(room, {
   name: string().nonempty(),
   images: string().array(),
@@ -43,3 +41,8 @@ export const currencySchema = createInsertSchema(currency);
 export const settingSchema = createInsertSchema(setting);
 export const contactUsSchema = createInsertSchema(contactUs);
 export const stagedJobSchema = createInsertSchema(stagedJob);
+
+export type Store = InferModel<typeof store, "select">;
+export type NewStore = Omit<InferModel<typeof store, "insert">, "id">;
+
+export type NewRoom = typeof room.$inferInsert;

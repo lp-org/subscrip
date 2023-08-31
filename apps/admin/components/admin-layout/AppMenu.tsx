@@ -6,27 +6,43 @@ import { LayoutContext } from "./context/layoutcontext";
 import { MenuProvider } from "./context/menucontext";
 import Link from "next/link";
 import { AppMenuItem } from "./types/types";
-
+import { useParams } from "next/navigation";
 const AppMenu = () => {
   const { layoutConfig } = useContext(LayoutContext);
-
+  const { storeId } = useParams();
   const model: AppMenuItem[] = [
     {
       label: "Home",
-      items: [{ label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" }],
+      items: [
+        {
+          label: "Dashboard",
+          icon: "pi pi-fw pi-chart-bar",
+          to: `/store/${storeId}/dashboard`,
+        },
+        {
+          label: "Rooms",
+          icon: "pi pi-fw pi-home",
+          to: `/store/${storeId}/rooms`,
+        },
+        {
+          label: "Bookings",
+          icon: "pi pi-fw pi-book",
+          to: `/store/${storeId}/bookings`,
+        },
+      ],
     },
     {
       label: "Setting",
       items: [
         {
           label: "Users & Permissions",
-          icon: "pi pi-fw pi-id-card",
-          to: "/settings/accounts",
+          icon: "pi pi-fw pi-user-edit",
+          to: `/store/${storeId}/settings/accounts`,
         },
         {
-          label: "Input",
-          icon: "pi pi-fw pi-check-square",
-          to: "/uikit/input",
+          label: "Billings",
+          icon: "pi pi-fw pi-credit-card",
+          to: `/store/${storeId}/settings/billings`,
         },
       ],
     },
@@ -82,7 +98,7 @@ const AppMenu = () => {
         {
           label: "Crud",
           icon: "pi pi-fw pi-pencil",
-          to: "/crud",
+          to: `/store/${storeId}/crud`,
         },
         {
           label: "Timeline",

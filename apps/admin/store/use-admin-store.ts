@@ -2,12 +2,12 @@ import { ToastMessage } from "primereact/toast";
 import { create } from "zustand";
 
 interface AdminStoreState {
-  selectedStore: string;
+  selectedStore: string | null;
   setSelectedStore: (data: string) => void;
 }
 
 export const useAdminStore = create<AdminStoreState>()((set) => ({
-  selectedStore: "",
+  selectedStore: null,
   setSelectedStore: (selectedStore) =>
     set((state) => {
       return { selectedStore };

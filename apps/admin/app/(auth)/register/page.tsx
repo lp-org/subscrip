@@ -4,11 +4,12 @@ import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import AdminApi from "sdk/src/api/admin-api";
+
 import { ErrorMessage } from "@hookform/error-message";
 import { getErrorMessage, useToast } from "ui";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import adminClient from "../../../utils/adminClient";
 type RegisterFormProps = {
   email: string;
   password: string;
@@ -23,7 +24,7 @@ const Login = () => {
     });
 
   const { mutate } = useMutation({
-    mutationFn: AdminApi.auth.register,
+    mutationFn: adminClient.auth.register,
     onSuccess: () => {
       router.push("/");
       showToast({ severity: "success", detail: "Register successful" });

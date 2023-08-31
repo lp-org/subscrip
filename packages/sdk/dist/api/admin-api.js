@@ -1,33 +1,43 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
-var client_1 = __importDefault(require("../client"));
-var AdminApi = {
-    user: {
-        get: function () {
-            return (0, client_1["default"])("GET", "admin/users");
-        }
-    },
-    auth: {
-        login: function (payload) {
-            return (0, client_1["default"])("POST", "admin/auth/login", payload);
+var AdminApi = function (request) {
+    return {
+        user: {
+            get: function () {
+                return request("GET", "admin/users");
+            }
         },
-        logout: function () {
-            return (0, client_1["default"])("POST", "admin/auth/logout");
+        auth: {
+            login: function (payload) {
+                return request("POST", "admin/auth/login", payload);
+            },
+            logout: function () {
+                return request("POST", "admin/auth/logout");
+            },
+            register: function (payload) {
+                return request("POST", "admin/auth/register", payload);
+            },
+            getSession: function () {
+                return request("GET", "admin/auth/me");
+            }
         },
-        register: function (payload) {
-            return (0, client_1["default"])("POST", "admin/auth/register", payload);
+        store: {
+            list: function () {
+                return request("GET", "admin/stores");
+            },
+            create: function (_a) {
+                var name = _a.name;
+                return request("POST", "admin/stores", { name: name });
+            }
         },
-        getSession: function () {
-            return (0, client_1["default"])("GET", "admin/auth/me");
+        room: {
+            create: function (payload) {
+                return request("POST", "admin/rooms", payload);
+            },
+            list: function () {
+                return request("GET", "admin/rooms");
+            }
         }
-    },
-    store: {
-        list: function () {
-            return (0, client_1["default"])("GET", "admin/stores");
-        }
-    }
+    };
 };
 exports["default"] = AdminApi;

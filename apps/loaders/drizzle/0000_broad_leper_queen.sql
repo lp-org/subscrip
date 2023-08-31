@@ -46,12 +46,6 @@ CREATE TABLE IF NOT EXISTS "store_to_user" (
 	"is_owner" boolean DEFAULT true
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "permission_to_store_user" (
-	"store_user_id" uuid,
-	"permission_id" uuid,
-	CONSTRAINT permission_to_store_user_store_user_id_permission_id PRIMARY KEY("store_user_id","permission_id")
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "permission" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"key" text NOT NULL,
@@ -83,6 +77,7 @@ CREATE TABLE IF NOT EXISTS "room" (
 	"quantity" integer DEFAULT 0,
 	"maximum_occupancy" integer DEFAULT 0,
 	"published" boolean DEFAULT false,
+	"store_id" uuid,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
@@ -234,13 +229,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "permission_to_store_user" ADD CONSTRAINT "permission_to_store_user_store_user_id_store_to_user_id_fk" FOREIGN KEY ("store_user_id") REFERENCES "store_to_user"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "permission_to_store_user" ADD CONSTRAINT "permission_to_store_user_permission_id_permission_id_fk" FOREIGN KEY ("permission_id") REFERENCES "permission"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "room" ADD CONSTRAINT "room_store_id_store_id_fk" FOREIGN KEY ("store_id") REFERENCES "store"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

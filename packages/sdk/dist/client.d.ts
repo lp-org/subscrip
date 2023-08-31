@@ -1,3 +1,4 @@
-import { Method } from "axios";
-export default function medusaRequest(method: Method, path?: string, payload?: {}): Promise<import("axios").AxiosResponse<any, any>>;
+import { AxiosRequestConfig, Method } from "axios";
+export declare const axiosClient: (option: AxiosRequestConfig) => import("axios").AxiosInstance;
+export default function clientRequest(method: Method, path?: string, payload?: {}): Promise<import("axios").AxiosResponse<any, any>>;
 //# sourceMappingURL=client.d.ts.map

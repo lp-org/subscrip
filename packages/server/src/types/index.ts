@@ -1,3 +1,6 @@
+import StoreService from "../services/StoreService";
+import UserService from "../services/UserService";
+
 export declare type Subscriber<T = unknown> = (
   data: T,
   eventName: string
@@ -29,3 +32,5 @@ export type FilterType = {
   limit?: number;
   offset?: number;
 };
+
+export type CurrentStore = ReturnType<StoreService["get"]>;

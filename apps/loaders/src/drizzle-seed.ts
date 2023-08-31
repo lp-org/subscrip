@@ -1,20 +1,30 @@
-import { user } from "db";
+import { AwilixContainer } from "awilix";
+import { PgJsDatabaseType, currency, user } from "db";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { CurrencyType, currencies } from "server";
+import UserService from "server/src/services/UserService";
+import { Logger } from "winston";
 
-async function seedDatabase() {
-  const client = postgres(process.env.DATABASE_URL || "");
-  const db = drizzle(client);
-
+export async function registerSeeder(defaultContainer: AwilixContainer) {
+  const db: PgJsDatabaseType = defaultContainer.resolve("db");
+  const logger: Logger = defaultContainer.resolve("logger");
+  const userService: UserService = defaultContainer.resolve("userService");
   const email = "admin@example.com";
   const password = "12345";
 
   const exist = await db.select().from(user).where(eq(user.email, email));
   if (!exist[0]) {
-    await db.insert(user).values({ email, password }).returning();
+    await userService.create({ email, password }, password);
+    logger.info("Seed Users");
   }
 
-  process.exit();
+  const currencyList = await db.select().from(currency);
+  const currencyData: CurrencyType[] = [];
+  for (const [key, value] of Object.entries(currencies)) {
+    currencyData.push(value);
+  }
+  if (currencyList.length == 0) {
+    await db.insert(currency).values(currencyData);
+    logger.info("Seed Currencies");
+  }
 }
-seedDatabase();

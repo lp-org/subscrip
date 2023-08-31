@@ -11,11 +11,11 @@ import { Toolbar } from "primereact/toolbar";
 import { classNames } from "primereact/utils";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import AdminApi from "sdk/src/api/admin-api";
 import InputError from "ui/InputError";
 import CrudDialog from "../../../../../components/CrudDIalog";
 import DeleteDialog from "../../../../../components/DeleteDialog";
 import { useToast } from "ui";
+import { useRequest } from "../../../../../utils/adminClient";
 type UserType = Partial<User>;
 const Crud = () => {
   const [productDialog, setProductDialog] = useState(false);
@@ -27,9 +27,9 @@ const Crud = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const { showToast } = useToast();
   const dt = useRef<DataTable<UserType[]>>(null);
-
+  const { adminClient } = useRequest();
   const { data, isLoading } = useQuery({
-    queryFn: AdminApi.user.get,
+    queryFn: adminClient.user.get,
   });
   const products = data?.data;
 

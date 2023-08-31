@@ -11,10 +11,12 @@ import React, {
 import { AppTopbarRef } from "./types/types";
 import { LayoutContext } from "./context/layoutcontext";
 import { Menu } from "primereact/menu";
-import AdminApi from "sdk/src/api/admin-api";
 import { useToast } from "ui";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import adminClient from "../../utils/adminClient";
+import useAdminUser from "../../utils/use-admin-user";
+import { Avatar } from "primereact/avatar";
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
   const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } =
     useContext(LayoutContext);
@@ -28,10 +30,14 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     topbarmenu: topbarmenuRef.current,
     topbarmenubutton: topbarmenubuttonRef.current,
   }));
+  const {
+    data: { data: me },
+  } = useAdminUser();
+
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationFn: AdminApi.auth.logout,
+    mutationFn: adminClient.auth.logout,
     onSuccess: () => {
       queryClient.invalidateQueries(["me"]);
       showToast({
@@ -81,20 +87,50 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
           "layout-topbar-menu-mobile-active": layoutState.profileSidebarVisible,
         })}
       >
-        <button type="button" className="p-link layout-topbar-button">
+        {/* <button type="button" className="p-link layout-topbar-button">
           <i className="pi pi-calendar"></i>
           <span>Calendar</span>
-        </button>
+        </button> */}
+        {/* 
         <button
           type="button"
           className="p-link layout-topbar-button"
-          onClick={(e) => profileMenu.current.toggle(e)}
+         
         >
           <i className="pi pi-user"></i>
           <span>Profile</span>
-        </button>
+        </button> */}
+
+        <Link href="/documentation">
+          <button type="button" className="p-link layout-topbar-button">
+            <i className="pi pi-cog"></i>
+            <span>Settings</span>
+          </button>
+        </Link>
+        {me.store?.name && (
+          <div className="p-link w-3 h-3 flex align-items-center ml-3">
+            <Avatar
+              label={me.store.name.charAt(0).toUpperCase()}
+              onClick={(e) => profileMenu.current.toggle(e)}
+            />
+          </div>
+        )}
         <Menu
           model={[
+            {
+              label: me.store?.name,
+              icon: () => (
+                <Avatar
+                  label={me.store?.name.charAt(0).toUpperCase()}
+                  onClick={(e) => profileMenu.current.toggle(e)}
+                  className="mr-2"
+                />
+              ),
+            },
+            {
+              label: "Switch Store",
+              command: () => router.push("/store"),
+            },
             {
               label: "Logout",
               command: handleLogout,
@@ -105,13 +141,6 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
           id="popup_menu_right"
           popupAlignment="right"
         />
-        <Link href="/documentation">
-          <button type="button" className="p-link layout-topbar-button">
-            <i className="pi pi-cog"></i>
-            <span>Settings</span>
-          </button>
-        </Link>
-
         <button type="button" className="p-link layout-topbar-button md:hidden">
           <span>Logout</span>
         </button>
