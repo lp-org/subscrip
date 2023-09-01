@@ -1,12 +1,17 @@
 {
     "name": "server",
-    "main": "dist/index.js",   
+    "main": "./dist/index.js",   
     "types": "src/index.ts",
     "scripts": {
         "clean": "rm -rf dist",
         "build": "tsc --build",
         "watch": "tsc --build --watch"
     },
+    "exports": {
+        ".": "./dist/index.js",
+        "./plugin-service": "./dist/plugin-servie/index.js"
+        
+      },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.391.0",
         "@aws-sdk/s3-request-presigner": "^3.391.0",

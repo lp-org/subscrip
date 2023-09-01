@@ -6,7 +6,7 @@ import {
   FileServiceUploadResult,
 } from "../interfaces/file";
 import { env } from "process";
-class LocalFileService extends AbstractFileService {
+export class LocalFileService extends AbstractFileService {
   protected uploadDir_: string;
   protected backendUrl_: string;
 
@@ -63,5 +63,3 @@ class LocalFileService extends AbstractFileService {
     throw Error("Not implemented");
   }
 }
-
-export default LocalFileService;

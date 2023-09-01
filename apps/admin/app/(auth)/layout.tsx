@@ -21,6 +21,7 @@ export default function RootLayout({
     if (data && !isLoading) {
       router.push("/");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, router.push]);
 
   if (!isLoading) {

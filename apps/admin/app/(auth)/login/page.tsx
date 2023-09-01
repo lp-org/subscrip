@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
@@ -47,7 +48,7 @@ const Login = () => {
           />
           <div className="text-900 text-3xl font-medium mb-3">Welcome Back</div>
           <span className="text-600 font-medium line-height-3">
-            Don't have an account?
+            Don&apos;t have an account?
           </span>
           <Link
             href={"/register"}

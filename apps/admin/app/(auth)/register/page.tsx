@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";

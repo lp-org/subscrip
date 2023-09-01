@@ -17,7 +17,7 @@ import {
   UploadStreamDescriptorType,
 } from "../interfaces/file";
 import { env } from "process";
-class S3Service extends AbstractFileService {
+export class S3Service extends AbstractFileService {
   protected bucket_: string;
   protected s3Url_: string;
   protected accessKeyId_: string;
@@ -160,5 +160,3 @@ class S3Service extends AbstractFileService {
     return await getSignedUrl(client, params, { expiresIn: 3600 });
   }
 }
-
-export default S3Service;

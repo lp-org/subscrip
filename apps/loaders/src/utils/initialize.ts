@@ -7,14 +7,14 @@ import {
 } from "awilix";
 import { connectDatabase } from "db";
 import {
+  LocalEventBusService,
+  LocalFileService,
   registerLogger,
   registerRoutes,
   registerSeeder,
   registerService,
   registerSubscriber,
 } from "server";
-import LocalEventBusService from "server/src/plugin-service/event-bus-local";
-import LocalFileService from "server/src/plugin-service/local-file";
 
 function initialize() {
   const defaultContainer = createContainer();

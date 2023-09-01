@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 import connectRedis from "connect-redis";
 
 // import cookieParser from "cookie-parser";
@@ -5,6 +6,7 @@ import { Express } from "express";
 import session, { SessionOptions } from "express-session";
 // import morgan from "morgan";
 import * as redis from "redis";
+import { loggerInstance } from "../utils/logger";
 
 type Options = {
   app: Express;

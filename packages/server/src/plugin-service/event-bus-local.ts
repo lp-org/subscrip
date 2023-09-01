@@ -15,7 +15,7 @@ export declare type SubscriberDescriptor = {
 };
 
 // eslint-disable-next-line max-len
-export default class LocalEventBusService {
+export class LocalEventBusService {
   protected readonly eventEmitter_: EventEmitter;
   protected readonly logger_: Logger;
 
