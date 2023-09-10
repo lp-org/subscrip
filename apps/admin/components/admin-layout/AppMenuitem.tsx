@@ -17,7 +17,13 @@ const AppMenuitem = (props: AppMenuItemProps) => {
   const key = props.parentKey
     ? props.parentKey + "-" + props.index
     : String(props.index);
-  const isActiveRoute = item!.to && pathname === item!.to;
+
+  let isActiveRoute = item!.to && pathname === item!.to;
+  if (props.item.preventExact) {
+    const reg = new RegExp(`${item.to}*`, "g");
+    isActiveRoute = reg.test(pathname);
+  }
+
   const active = activeMenu === key || activeMenu.startsWith(key + "-");
   const onRouteChange = (url: string) => {
     if (item!.to && item!.to === url) {

@@ -1,5 +1,5 @@
 import { useParams } from "next/navigation";
-import { axiosClient } from "sdk";
+import { AxiosRequestConfig, axiosClient } from "sdk";
 import AdminApi from "sdk/src/api/admin-api";
 import { useMemo } from "react";
 
@@ -13,13 +13,15 @@ type ClientRequest = {
 
 const clientRequest = ({ storeId }: ClientRequest | undefined) => {
   return (method: string, path = "", payload = {}) => {
-    const options = {
+    const options: AxiosRequestConfig = {
       method,
       withCredentials: true,
       url: path,
       data: payload,
       headers: { storeId },
     };
+    options.params = method === "GET" && payload;
+
     return request(options);
   };
 };
@@ -32,5 +34,3 @@ export const useRequest = () => {
   }, [storeId]);
   return { adminClient };
 };
-
-export default AdminApi(clientRequest({}));

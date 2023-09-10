@@ -44,7 +44,6 @@ export default class RoomService {
 
   async create(payload: NewRoomType) {
     const currentStore = await this.currentStore_;
-    console.log(currentStore);
     roomSchema.parse(payload);
     return await this.db_.transaction(async (tx) => {
       const result = await tx

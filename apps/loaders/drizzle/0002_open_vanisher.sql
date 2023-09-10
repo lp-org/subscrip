@@ -1,0 +1,1 @@
+ALTER TABLE "store_subscription_plan" ADD CONSTRAINT "store_subscription_plan_store_id_unique" UNIQUE("store_id");

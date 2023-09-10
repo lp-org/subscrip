@@ -23,6 +23,7 @@ const AppMenu = () => {
           label: "Rooms",
           icon: "pi pi-fw pi-home",
           to: `/store/${storeId}/rooms`,
+          preventExact: true,
         },
         {
           label: "Bookings",
@@ -129,20 +130,6 @@ const AppMenu = () => {
             <li className="menu-separator"></li>
           );
         })}
-
-        <Link
-          href="https://blocks.primereact.org"
-          target="_blank"
-          style={{ cursor: "pointer" }}
-        >
-          <img
-            alt="Prime Blocks"
-            className="w-full mt-3"
-            src={`/layout/images/banner-primeblocks${
-              layoutConfig.colorScheme === "light" ? "" : "-dark"
-            }.png`}
-          />
-        </Link>
       </ul>
     </MenuProvider>
   );

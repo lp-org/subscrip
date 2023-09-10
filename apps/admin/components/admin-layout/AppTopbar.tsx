@@ -14,9 +14,13 @@ import { Menu } from "primereact/menu";
 import { useToast } from "ui";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import adminClient from "../../utils/adminClient";
+
 import useAdminUser from "../../utils/use-admin-user";
 import { Avatar } from "primereact/avatar";
+import { useRequest } from "../../utils/adminClient";
+import Image from "next/image";
+import Logo from "../logo/logo";
+import { useAdminRouter } from "../../utils/use-admin-router";
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
   const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } =
     useContext(LayoutContext);
@@ -36,6 +40,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
 
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { adminClient } = useRequest();
   const { mutate } = useMutation({
     mutationFn: adminClient.auth.logout,
     onSuccess: () => {
@@ -48,20 +53,15 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     },
   });
   const handleLogout = () => mutate();
-
+  const { push } = useAdminRouter();
   return (
     <div className="layout-topbar">
-      <Link href="/" className="layout-topbar-logo">
-        <img
-          src={`/layout/images/logo-${
-            layoutConfig.colorScheme !== "light" ? "white" : "dark"
-          }.svg`}
-          width="47.22px"
-          height={"35px"}
-          alt="logo"
-        />
-        <span>SAKAI</span>
-      </Link>
+      <div
+        onClick={() => push("/dashboard")}
+        className="layout-topbar-logo cursor-pointer"
+      >
+        <Logo isDark={layoutConfig.colorScheme === "light" ? false : true} />
+      </div>
 
       <button
         ref={menubuttonRef}

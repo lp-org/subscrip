@@ -9,10 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.8",
+    "@fullcalendar/daygrid": "^6.1.8",
+    "@fullcalendar/react": "^6.1.8",
     "@hookform/error-message": "^2.0.1",
-    "@tanstack/react-query": "^4.32.6",   
+    "@stripe/react-stripe-js": "^2.1.2",
+    "@stripe/stripe-js": "^2.1.1",
+    "@tanstack/react-query": "^4.32.6",
     "awilix": "^8.0.1",
+    "dayjs": "^1.11.9",
     "db": "*",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.276.0",
     "next": "^13.4.19",
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
@@ -25,6 +33,7 @@
     "ui": "*"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.198",
     "@types/node": "^17.0.12",
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",

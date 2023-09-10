@@ -11,9 +11,11 @@ import {
   uniqueIndex,
   jsonb,
   primaryKey,
+  time,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { array, custom, number, object, string, z } from "zod";
+import { StripeSubscriptionStatusType } from "./types";
 
 export const store = pgTable("store", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -22,25 +24,37 @@ export const store = pgTable("store", {
   url: text("url").unique(),
   currency: text("currency").references(() => currency.code),
   active: boolean("active").default(true),
-  storeBillingId: uuid("store_billing_id").references(() => storebilling.id),
-  planId: uuid("plan_id").references(() => plan.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const storebilling = pgTable("store_billing", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  currency: text("currency").references(() => currency.code),
-  billingCycle: text("billing_cycle"),
-});
-
 export const plan = pgTable("plan", {
   id: uuid("id").defaultRandom().primaryKey(),
-  key: text("key").$type<"trial" | "starter">().default("trial"),
+  key: text("key").$type<"starter">().default("starter"),
   name: text("name").notNull(),
   description: text("description"),
+  interval: text("interval").$type<"day" | "month" | "year">().default("month"),
   currency: text("currency").references(() => currency.code),
   price: integer("price"),
+  trialPeriod: integer("trial_period"),
+  sPlanId: text("s_plan_id"),
+});
+
+export const storeSubscriptionPlan = pgTable("store_subscription_plan", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  storeId: uuid("store_id").references(() => store.id),
+
+  planId: uuid("plan_id").references(() => plan.id),
+  status: text("status")
+    .$type<StripeSubscriptionStatusType>()
+    .default("incomplete"),
+  currency: text("currency").references(() => currency.code),
+  price: integer("price"),
+  nextBillingDate: timestamp("next_billing_date"),
+  sSubscriptionId: text("s_subscription_id").unique(),
+  sPaymentMethodId: text("s_payment_method_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const user = pgTable("user", {
@@ -51,6 +65,19 @@ export const user = pgTable("user", {
   phone: text("phone"),
   role_id: text("role").$type<"admin">(),
   active: boolean("active").default(true),
+  sCustomerId: text("s_customer_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const storeInvoice = pgTable("store_invoice", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sInvoiceId: text("s_invoice_id").unique(),
+  sCustomerId: text("s_customer_id"),
+  sSubscriptionId: text("s_subscription_id"),
+  amount: integer("amount"),
+  status: text("status"),
+  currency: text("currency"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -58,7 +85,30 @@ export const user = pgTable("user", {
 export const storeRelations = relations(store, ({ many, one }) => ({
   room: many(room),
   user: many(user),
-  plan: one(plan),
+  storeSubscriptionPlan: one(storeSubscriptionPlan),
+}));
+
+export const planRelations = relations(plan, ({ many, one }) => ({
+  storeSubscriptionPlans: many(storeSubscriptionPlan),
+}));
+
+export const storeSubscriptionPlanRelations = relations(
+  storeSubscriptionPlan,
+  ({ many, one }) => ({
+    plan: one(plan, {
+      fields: [storeSubscriptionPlan.planId],
+      references: [plan.id],
+    }),
+    store: one(store),
+    storeInvoice: many(storeInvoice),
+  })
+);
+
+export const storeInvoiceRelations = relations(storeInvoice, ({ one }) => ({
+  storeSubscriptionPlan: one(storeSubscriptionPlan, {
+    fields: [storeInvoice.sSubscriptionId],
+    references: [storeSubscriptionPlan.sSubscriptionId],
+  }),
 }));
 
 export const userRelations = relations(user, ({ many }) => ({

@@ -4,6 +4,9 @@ import { AxiosResponse } from "axios";
 import UserService from "server/src/services/UserService";
 import StoreService from "server/src/services/StoreService";
 import RoomService from "server/src/services/RoomService";
+import PaymentGatewayService from "server/src/services/PaymentGatewayService";
+import PlanService from "server/src/services/PlanService";
+import StoreBillingService from "server/src/services/StoreBillingService";
 const AdminApi = (request: typeof clientRequest) => {
   return {
     user: {
@@ -47,6 +50,49 @@ const AdminApi = (request: typeof clientRequest) => {
       },
       list(): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>> {
         return request("GET", "admin/rooms");
+      },
+    },
+    plan: {
+      list(): Promise<AxiosResponse<Awaited<ReturnType<PlanService["list"]>>>> {
+        return request("GET", "admin/plans");
+      },
+    },
+
+    billing: {
+      session(): Promise<
+        AxiosResponse<
+          Awaited<ReturnType<PaymentGatewayService["createSession"]>>
+        >
+      > {
+        return request("POST", "admin/billing/session");
+      },
+
+      getPaymentMethod(
+        id: string
+      ): Promise<
+        AxiosResponse<
+          Awaited<ReturnType<PaymentGatewayService["getPaymentMethod"]>>
+        >
+      > {
+        return request("GET", `admin/billing/paymentMethod/${id}`);
+      },
+
+      mySubscription(
+        filter: any
+      ): Promise<
+        AxiosResponse<
+          Awaited<ReturnType<StoreBillingService["getMySubscription"]>>
+        >
+      > {
+        return request("GET", "admin/billing/store-subscription", filter);
+      },
+
+      subscribe(
+        planId: string
+      ): Promise<
+        AxiosResponse<Awaited<ReturnType<StoreBillingService["subscribePlan"]>>>
+      > {
+        return request("POST", "admin/billing/subscribe", { planId });
       },
     },
   };

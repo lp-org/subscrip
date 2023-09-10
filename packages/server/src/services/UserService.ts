@@ -14,22 +14,32 @@ import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { InferModel, getTableName, eq, and } from "drizzle-orm";
 import { RESOLVER } from "awilix";
 import Scrypt from "scrypt-kdf";
+import PaymentGatewayService from "./PaymentGatewayService";
+import { CurrentStore } from "../types";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
-  currentUser: number;
-  currentStore: any;
+  currentUser: Express.User;
+  currentStore: CurrentStore;
+  paymentGatewayService: PaymentGatewayService;
 };
 
 class UserService extends Model<typeof user> {
   static [RESOLVER] = {};
   protected override readonly db_: PgJsDatabaseType;
-  protected readonly currentUser_: number;
-  protected readonly currentStore_: any;
-  constructor({ db, currentUser, currentStore }: InjectedDependencies) {
+  protected readonly currentUser_: Express.User;
+  protected readonly currentStore_: CurrentStore;
+  protected readonly paymentGatewayService_: PaymentGatewayService;
+  constructor({
+    db,
+    currentUser,
+    currentStore,
+    paymentGatewayService,
+  }: InjectedDependencies) {
     super(arguments[0], user);
     this.db_ = db;
     this.currentUser_ = currentUser;
     this.currentStore_ = currentStore;
+    this.paymentGatewayService_ = paymentGatewayService;
   }
 
   async create(data: NewUser, password: string) {
@@ -45,11 +55,15 @@ class UserService extends Model<typeof user> {
       if (hasUser[0]) {
         throw new Error("Email already exist");
       }
+      const customerId = await this.paymentGatewayService_.createCustomer(
+        data.email
+      );
       const result = await tx
         .insert(user)
         .values({
           email: data.email,
           password: hashedPassword,
+          sCustomerId: customerId,
         })
         .returning({
           id: user.id,
@@ -67,7 +81,7 @@ class UserService extends Model<typeof user> {
           id: user.id,
           email: user.email,
           createdAt: user.createdAt,
-
+          sCustomerId: user.sCustomerId,
           store: {
             ...(currentStore ? { storeUserId: storeToUser.id } : {}),
             ...(currentStore ? { id: storeToUser.storeId } : {}),

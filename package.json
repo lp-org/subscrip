@@ -10,9 +10,9 @@
     "dev": "dotenv turbo run dev",
     "watch": " turbo run watch",
     "lint": "turbo run lint",
-    "generate": "dotenv turbo run generate",
-    "drop": "dotenv turbo run drop",
-    "push": "dotenv turbo run push",
+    "generate": "npm run generate --workspace=apps/loaders",
+    "drop": "npm run drop --workspace=apps/loaders",
+    "push": "npm run push --workspace=apps/loaders",
     "seed": "dotenv turbo run seed",
     "studio": "dotenv turbo run studio",
     "clean": "turbo run clean"

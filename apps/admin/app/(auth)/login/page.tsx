@@ -41,7 +41,7 @@ const Login = () => {
       <div className="surface-card p-4 shadow-2 border-round w-full lg:w-6">
         <div className="text-center mb-5">
           <img
-            src="/demo/images/blocks/logos/hyper.svg"
+            src="/images/logo.png"
             alt="hyper"
             height={50}
             className="mb-3"

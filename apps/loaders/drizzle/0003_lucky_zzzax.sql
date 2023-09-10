@@ -1,0 +1,2 @@
+ALTER TABLE "store_subscription_plan" DROP CONSTRAINT "store_subscription_plan_store_id_unique";--> statement-breakpoint
+ALTER TABLE "store_subscription_plan" ALTER COLUMN "status" SET DEFAULT 'incomplete';

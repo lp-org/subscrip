@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "2200f06c-0f65-4cf4-822c-64134c4f169d",
+  "id": "1441f99c-910a-4c0f-9e5e-c61c139c0529",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "store": {
@@ -47,18 +47,6 @@
           "notNull": false,
           "default": true
         },
-        "store_billing_id": {
-          "name": "store_billing_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "plan_id": {
-          "name": "plan_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -88,32 +76,6 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
-        },
-        "store_store_billing_id_store_billing_id_fk": {
-          "name": "store_store_billing_id_store_billing_id_fk",
-          "tableFrom": "store",
-          "tableTo": "store_billing",
-          "columnsFrom": [
-            "store_billing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "store_plan_id_plan_id_fk": {
-          "name": "store_plan_id_plan_id_fk",
-          "tableFrom": "store",
-          "tableTo": "plan",
-          "columnsFrom": [
-            "plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -126,49 +88,6 @@
           ]
         }
       }
-    },
-    "store_billing": {
-      "name": "store_billing",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "currency": {
-          "name": "currency",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "billing_cycle": {
-          "name": "billing_cycle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "store_billing_currency_currency_code_fk": {
-          "name": "store_billing_currency_currency_code_fk",
-          "tableFrom": "store_billing",
-          "tableTo": "currency",
-          "columnsFrom": [
-            "currency"
-          ],
-          "columnsTo": [
-            "code"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
     },
     "plan": {
       "name": "plan",
@@ -200,6 +119,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "interval": {
+          "name": "interval",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'month'"
+        },
         "currency": {
           "name": "currency",
           "type": "text",
@@ -211,6 +137,12 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "s_plan_id": {
+          "name": "s_plan_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -218,6 +150,126 @@
         "plan_currency_currency_code_fk": {
           "name": "plan_currency_currency_code_fk",
           "tableFrom": "plan",
+          "tableTo": "currency",
+          "columnsFrom": [
+            "currency"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "store_subscription_plan": {
+      "name": "store_subscription_plan",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "store_id": {
+          "name": "store_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'active'"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_billing_date": {
+          "name": "next_billing_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "s_subscription_id": {
+          "name": "s_subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "s_payment_method_id": {
+          "name": "s_payment_method_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "store_subscription_plan_store_id_store_id_fk": {
+          "name": "store_subscription_plan_store_id_store_id_fk",
+          "tableFrom": "store_subscription_plan",
+          "tableTo": "store",
+          "columnsFrom": [
+            "store_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "store_subscription_plan_plan_id_plan_id_fk": {
+          "name": "store_subscription_plan_plan_id_plan_id_fk",
+          "tableFrom": "store_subscription_plan",
+          "tableTo": "plan",
+          "columnsFrom": [
+            "plan_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "store_subscription_plan_currency_currency_code_fk": {
+          "name": "store_subscription_plan_currency_currency_code_fk",
+          "tableFrom": "store_subscription_plan",
           "tableTo": "currency",
           "columnsFrom": [
             "currency"
@@ -279,6 +331,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": true
+        },
+        "s_customer_id": {
+          "name": "s_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

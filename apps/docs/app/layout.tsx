@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function RootLayout({
   children,
 }: {
@@ -9,3 +11,7 @@ export default function RootLayout({
     </html>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Sakai by PrimeReact | Free Admin Template for NextJS",
+};

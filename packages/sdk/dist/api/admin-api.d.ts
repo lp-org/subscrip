@@ -4,6 +4,9 @@ import { AxiosResponse } from "axios";
 import UserService from "server/src/services/UserService";
 import StoreService from "server/src/services/StoreService";
 import RoomService from "server/src/services/RoomService";
+import PaymentGatewayService from "server/src/services/PaymentGatewayService";
+import PlanService from "server/src/services/PlanService";
+import StoreBillingService from "server/src/services/StoreBillingService";
 declare const AdminApi: (request: typeof clientRequest) => {
     user: {
         get(): Promise<AxiosResponse<User[]>>;
@@ -23,6 +26,15 @@ declare const AdminApi: (request: typeof clientRequest) => {
     room: {
         create(payload: NewRoom): Promise<AxiosResponse<Awaited<ReturnType<RoomService["create"]>>>>;
         list(): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>>;
+    };
+    plan: {
+        list(): Promise<AxiosResponse<Awaited<ReturnType<PlanService["list"]>>>>;
+    };
+    billing: {
+        session(): Promise<AxiosResponse<Awaited<ReturnType<PaymentGatewayService["createSession"]>>>>;
+        getPaymentMethod(id: string): Promise<AxiosResponse<Awaited<ReturnType<PaymentGatewayService["getPaymentMethod"]>>>>;
+        mySubscription(filter: any): Promise<AxiosResponse<Awaited<ReturnType<StoreBillingService["getMySubscription"]>>>>;
+        subscribe(planId: string): Promise<AxiosResponse<Awaited<ReturnType<StoreBillingService["subscribePlan"]>>>>;
     };
 };
 export default AdminApi;

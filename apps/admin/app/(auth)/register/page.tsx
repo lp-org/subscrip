@@ -10,7 +10,9 @@ import { ErrorMessage } from "@hookform/error-message";
 import { getErrorMessage, useToast } from "ui";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import adminClient from "../../../utils/adminClient";
+import { useRequest } from "../../../utils/adminClient";
+import Link from "next/link";
+
 type RegisterFormProps = {
   email: string;
   password: string;
@@ -23,7 +25,7 @@ const Login = () => {
     useForm<RegisterFormProps>({
       defaultValues: { email: "", password: "", confirmPassword: "" },
     });
-
+  const { adminClient } = useRequest();
   const { mutate } = useMutation({
     mutationFn: adminClient.auth.register,
     onSuccess: () => {
@@ -42,16 +44,19 @@ const Login = () => {
       <div className="surface-card p-4 shadow-2 border-round w-full lg:w-6">
         <div className="text-center mb-5">
           <img
-            src="/demo/images/blocks/logos/hyper.svg"
+            src="/images/logo.png"
             alt="hyper"
             height={50}
             className="mb-3"
           />
           <div className="text-900 text-3xl font-medium mb-3">Register</div>
 
-          <a className="font-medium no-underline ml-2 text-blue-500 cursor-pointer">
+          <Link
+            href={"/login"}
+            className="font-medium no-underline ml-2 text-blue-500 cursor-pointer"
+          >
             Go to Login
-          </a>
+          </Link>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>

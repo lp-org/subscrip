@@ -37,6 +37,25 @@ var AdminApi = function (request) {
             list: function () {
                 return request("GET", "admin/rooms");
             }
+        },
+        plan: {
+            list: function () {
+                return request("GET", "admin/plans");
+            }
+        },
+        billing: {
+            session: function () {
+                return request("POST", "admin/billing/session");
+            },
+            getPaymentMethod: function (id) {
+                return request("GET", "admin/billing/paymentMethod/".concat(id));
+            },
+            mySubscription: function (filter) {
+                return request("GET", "admin/billing/store-subscription", filter);
+            },
+            subscribe: function (planId) {
+                return request("POST", "admin/billing/subscribe", { planId: planId });
+            }
         }
     };
 };

@@ -31,6 +31,7 @@ const Crud = () => {
   const { adminClient } = useRequest();
   const { data, isLoading } = useQuery({
     queryFn: adminClient.user.get,
+    queryKey: ["userGet"],
   });
   const products = data?.data;
 

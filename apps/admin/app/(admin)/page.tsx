@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { Metadata } from "next/types";
 interface RootLayoutProps {
   children: React.ReactNode;
 }
+
 export default function MainPage({ children }: RootLayoutProps) {
   const { data, isLoading } = useAdminUser();
   const router = useRouter();

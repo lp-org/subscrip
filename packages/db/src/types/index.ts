@@ -13,8 +13,18 @@ import {
   contactUs,
   stagedJob,
   store,
+  storeSubscriptionPlan,
 } from "../schema";
 import { InferModel } from "drizzle-orm";
+export type StripeSubscriptionStatusType =
+  | "incomplete"
+  | "incomplete_expired"
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "unpaid"
+  | "paused";
 
 export type User = typeof user.$inferSelect;
 export type NewUser = Omit<typeof user.$inferInsert, "id">;
@@ -46,3 +56,6 @@ export type Store = InferModel<typeof store, "select">;
 export type NewStore = Omit<InferModel<typeof store, "insert">, "id">;
 
 export type NewRoom = typeof room.$inferInsert;
+
+export type NewStoreSubscriptionPlan =
+  typeof storeSubscriptionPlan.$inferInsert;

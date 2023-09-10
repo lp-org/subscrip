@@ -21,6 +21,14 @@ import auth from "./middleware/auth";
 import cookieParser from "cookie-parser";
 import { loggerInstance } from "./utils/logger";
 import StoreService from "./services/StoreService";
+import {
+  PgJsDatabaseType,
+  plan,
+  store,
+  storeSubscriptionPlan,
+  storeToUser,
+} from "db";
+import { eq, and } from "drizzle-orm";
 
 export function registerService(container: AwilixContainer) {
   const corePath = "./services/*.js";
@@ -58,7 +66,7 @@ export function registerRoutes(container: AwilixContainer) {
   session({ app });
   passport({ app, container });
 
-  app.use(json());
+  app.use(/^(?:(?!\/webhook\/stripe).)*$/, json());
   // Loads all controllers in the `routes` folder
   // relative to the current working directory.
   // This is a glob pattern.
@@ -70,15 +78,35 @@ export function registerRoutes(container: AwilixContainer) {
     req.container.register({
       currentStore: asFunction(async () => {
         if (req.user && req.user.userId) {
-          const storeService: StoreService =
-            req.container.resolve("storeService");
+          const db: PgJsDatabaseType = req.container.resolve("db");
           const storeId = req.headers.storeid;
 
-          if (storeId) {
-            const currentStore = await storeService.get(storeId as string);
-            if (!currentStore) throw new Error("Store not exist");
-            return currentStore;
+          if (storeId && typeof storeId === "string") {
+            const currentStore = await db
+              .select({
+                storeId: store.id,
+                storeUserId: storeToUser.id,
+                plan: plan.key,
+                planStatus: storeSubscriptionPlan.status,
+              })
+              .from(store)
+              .innerJoin(storeToUser, eq(storeToUser.storeId, store.id))
+              .leftJoin(
+                storeSubscriptionPlan,
+                eq(storeToUser.storeId, storeSubscriptionPlan.id)
+              )
+              .leftJoin(plan, eq(storeSubscriptionPlan.planId, plan.id))
+              .where(
+                and(
+                  eq(storeToUser.userId, req.user.userId),
+                  eq(storeToUser.storeId, storeId!)
+                )
+              );
+
+            if (!currentStore[0]) throw new Error("Store not exist");
+            return currentStore[0];
           }
+          return undefined;
         }
         return undefined;
       }).scoped(),

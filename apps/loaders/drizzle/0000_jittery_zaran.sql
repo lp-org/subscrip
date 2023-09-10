@@ -5,17 +5,9 @@ CREATE TABLE IF NOT EXISTS "store" (
 	"url" text,
 	"currency" text,
 	"active" boolean DEFAULT true,
-	"store_billing_id" uuid,
-	"plan_id" uuid,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "store_url_unique" UNIQUE("url")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "store_billing" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"currency" text,
-	"billing_cycle" text
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "plan" (
@@ -23,8 +15,24 @@ CREATE TABLE IF NOT EXISTS "plan" (
 	"key" text DEFAULT 'trial',
 	"name" text NOT NULL,
 	"description" text,
+	"interval" text DEFAULT 'month',
 	"currency" text,
-	"price" integer
+	"price" integer,
+	"s_plan_id" text
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "store_subscription_plan" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"store_id" uuid,
+	"plan_id" uuid,
+	"status" text DEFAULT 'active',
+	"currency" text,
+	"price" integer,
+	"next_billing_date" timestamp,
+	"s_subscription_id" text NOT NULL,
+	"s_payment_method_id" text,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user" (
@@ -35,6 +43,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"phone" text,
 	"role" text,
 	"active" boolean DEFAULT true,
+	"s_customer_id" text,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
@@ -193,25 +202,25 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "store" ADD CONSTRAINT "store_store_billing_id_store_billing_id_fk" FOREIGN KEY ("store_billing_id") REFERENCES "store_billing"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "store" ADD CONSTRAINT "store_plan_id_plan_id_fk" FOREIGN KEY ("plan_id") REFERENCES "plan"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "store_billing" ADD CONSTRAINT "store_billing_currency_currency_code_fk" FOREIGN KEY ("currency") REFERENCES "currency"("code") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "plan" ADD CONSTRAINT "plan_currency_currency_code_fk" FOREIGN KEY ("currency") REFERENCES "currency"("code") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "store_subscription_plan" ADD CONSTRAINT "store_subscription_plan_store_id_store_id_fk" FOREIGN KEY ("store_id") REFERENCES "store"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "store_subscription_plan" ADD CONSTRAINT "store_subscription_plan_plan_id_plan_id_fk" FOREIGN KEY ("plan_id") REFERENCES "plan"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "store_subscription_plan" ADD CONSTRAINT "store_subscription_plan_currency_currency_code_fk" FOREIGN KEY ("currency") REFERENCES "currency"("code") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

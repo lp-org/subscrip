@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import PrimeReact from "primereact/api";
+import { PrimeReactContext } from "primereact/api";
 import { Button } from "primereact/button";
 import { InputSwitch, InputSwitchChangeEvent } from "primereact/inputswitch";
 import { RadioButton, RadioButtonChangeEvent } from "primereact/radiobutton";
@@ -10,11 +10,13 @@ import { classNames } from "primereact/utils";
 import React, { useContext, useEffect, useState } from "react";
 import { AppConfigProps, LayoutConfig, LayoutState } from "./types/types";
 import { LayoutContext } from "./context/layoutcontext";
+import { Moon, Sun } from "lucide-react";
 
 const AppConfig = (props: AppConfigProps) => {
   const [scales] = useState([12, 13, 14, 15, 16]);
   const { layoutConfig, setLayoutConfig, layoutState, setLayoutState } =
     useContext(LayoutContext);
+  const context = useContext(PrimeReactContext);
 
   const onConfigButtonClick = () => {
     setLayoutState((prevState: LayoutState) => ({
@@ -38,7 +40,7 @@ const AppConfig = (props: AppConfigProps) => {
   };
 
   const changeRipple = (e: InputSwitchChangeEvent) => {
-    PrimeReact.ripple = e.value as boolean;
+    context.ripple = e.value as boolean;
     setLayoutConfig((prevState: LayoutConfig) => ({
       ...prevState,
       ripple: e.value as boolean,
@@ -53,7 +55,7 @@ const AppConfig = (props: AppConfigProps) => {
   };
 
   const changeTheme = (theme: string, colorScheme: string) => {
-    PrimeReact.changeTheme?.(layoutConfig.theme, theme, "theme-css", () => {
+    context.changeTheme?.(layoutConfig.theme, theme, "theme-css", () => {
       setLayoutConfig((prevState: LayoutConfig) => ({
         ...prevState,
         theme,
@@ -162,7 +164,7 @@ const AppConfig = (props: AppConfigProps) => {
               </div>
             </div>
 
-            <h5>Input Style</h5>
+            {/* <h5>Input Style</h5>
             <div className="flex">
               <div className="field-radiobutton flex-1">
                 <RadioButton
@@ -190,35 +192,27 @@ const AppConfig = (props: AppConfigProps) => {
             <InputSwitch
               checked={layoutConfig.ripple as boolean}
               onChange={(e) => changeRipple(e)}
-            ></InputSwitch>
+            ></InputSwitch> */}
           </>
         )}
 
         <h5>Theme</h5>
         <div className="grid">
           <div className="col-3">
-            <button
+            <RadioButton
               className="p-link w-2rem h-2rem"
+              checked={layoutConfig.colorScheme === "light"}
               onClick={() => changeTheme("lara-light-purple", "light")}
-            >
-              <img
-                src="/layout/images/themes/saga-blue.png"
-                className="w-2rem h-2rem"
-                alt="Saga Blue"
-              />
-            </button>
+            ></RadioButton>
+            <Sun />
           </div>
           <div className="col-3">
-            <button
+            <RadioButton
               className="p-link w-2rem h-2rem"
+              checked={layoutConfig.colorScheme === "dark"}
               onClick={() => changeTheme("lara-dark-purple", "dark")}
-            >
-              <img
-                src="/layout/images/themes/saga-green.png"
-                className="w-2rem h-2rem"
-                alt="Saga Green"
-              />
-            </button>
+            ></RadioButton>
+            <Moon />
           </div>
         </div>
       </Sidebar>

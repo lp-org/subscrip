@@ -15,5 +15,6 @@ export default function clientRequest(method: Method, path = "", payload = {}) {
     url: path,
     data: payload,
   };
+
   return client(options);
 }

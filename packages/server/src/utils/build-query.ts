@@ -8,8 +8,9 @@ import {
   desc,
   eq,
   ilike,
+  inArray,
 } from "drizzle-orm";
-import { AnyPgTable, PgTableWithColumns } from "drizzle-orm/pg-core";
+import { AnyPgTable, PgTableFn, PgTableWithColumns } from "drizzle-orm/pg-core";
 import { FilterType } from "../types";
 import { SchemaType } from "db";
 
@@ -72,4 +73,21 @@ export function buildQuery<
     limit,
     offset,
   };
+}
+
+export function whereEqQuery(
+  filter: Record<string, unknown> | undefined,
+  table_: ReturnType<PgTableFn>
+) {
+  const where: SQL[] = [];
+  if (filter) {
+    for (const [key, value] of Object.entries(filter)) {
+      if (typeof value === "string" && value.includes(",")) {
+        const inValue = value.split(",");
+        where.push(inArray(table_[key], inValue));
+      } else where.push(eq(table_[key], value));
+    }
+  }
+
+  return where;
 }
