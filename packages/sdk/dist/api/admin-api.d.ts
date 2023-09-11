@@ -7,6 +7,8 @@ import RoomService from "server/src/services/RoomService";
 import PaymentGatewayService from "server/src/services/PaymentGatewayService";
 import PlanService from "server/src/services/PlanService";
 import StoreBillingService from "server/src/services/StoreBillingService";
+import BookingService from "server/src/services/BookingService";
+import { createBookingDTOType } from "server";
 declare const AdminApi: (request: typeof clientRequest) => {
     user: {
         get(): Promise<AxiosResponse<User[]>>;
@@ -25,7 +27,7 @@ declare const AdminApi: (request: typeof clientRequest) => {
     };
     room: {
         create(payload: NewRoom): Promise<AxiosResponse<Awaited<ReturnType<RoomService["create"]>>>>;
-        list(): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>>;
+        list(params: any): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>>;
     };
     plan: {
         list(): Promise<AxiosResponse<Awaited<ReturnType<PlanService["list"]>>>>;
@@ -35,6 +37,9 @@ declare const AdminApi: (request: typeof clientRequest) => {
         getPaymentMethod(id: string): Promise<AxiosResponse<Awaited<ReturnType<PaymentGatewayService["getPaymentMethod"]>>>>;
         mySubscription(filter: any): Promise<AxiosResponse<Awaited<ReturnType<StoreBillingService["getMySubscription"]>>>>;
         subscribe(planId: string): Promise<AxiosResponse<Awaited<ReturnType<StoreBillingService["subscribePlan"]>>>>;
+    };
+    booking: {
+        create(payload: createBookingDTOType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["create"]>>>>;
     };
 };
 export default AdminApi;

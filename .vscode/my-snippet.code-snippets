@@ -46,7 +46,7 @@
     "body": [
       "import { route } from \"awilix-express\";",
       "import { Request, Response } from \"express\";",
-      "import $1Service from \"../../services/StoreService\";",
+      "import $1Service from \"../../services/$1Service\";",
       "",
       "type InjectedDependencies = {",
       "  $2Service: $1Service;",
@@ -54,7 +54,7 @@
       "",
       "@route(\"/$2\")",
       "export default class $1Api {",
-      "  protected readonly storeService_: $1Service;",
+      "  protected readonly $2Service_: $1Service;",
       "  constructor({ $2Service }: InjectedDependencies) {",
       "    this.$2Service_ = $2Service;",
       "  }",

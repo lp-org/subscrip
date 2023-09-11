@@ -9,7 +9,7 @@ import path from "path";
 import glob from "glob";
 import cors from "cors";
 export * from "./services";
-
+export * from "./types";
 export * from "./plugin-service";
 import Express, { json } from "express";
 export * from "./utils";

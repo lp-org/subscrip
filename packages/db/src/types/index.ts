@@ -26,6 +26,12 @@ export type StripeSubscriptionStatusType =
   | "unpaid"
   | "paused";
 
+export type BookingPaymentStatusType =
+  | "paid"
+  | "not_paid"
+  | "refunded"
+  | "canceled";
+
 export type User = typeof user.$inferSelect;
 export type NewUser = Omit<typeof user.$inferInsert, "id">;
 

@@ -1,5 +1,10 @@
 import { EventEmitter } from "events";
-import { EmitData, Subscriber, SubscriberContext } from "../types";
+import {
+  EmitData,
+  Subscriber,
+  SubscriberContext,
+  SubscriberDescriptor,
+} from "../types";
 import { ulid } from "ulid";
 import { Logger } from "winston";
 const eventEmitter = new EventEmitter();
@@ -7,11 +12,6 @@ eventEmitter.setMaxListeners(Infinity);
 
 type InjectedDependencies = {
   logger: Logger;
-};
-
-export declare type SubscriberDescriptor = {
-  id: string;
-  subscriber: Subscriber;
 };
 
 // eslint-disable-next-line max-len

@@ -34,8 +34,8 @@ var AdminApi = function (request) {
             create: function (payload) {
                 return request("POST", "admin/rooms", payload);
             },
-            list: function () {
-                return request("GET", "admin/rooms");
+            list: function (params) {
+                return request("GET", "admin/rooms", params);
             }
         },
         plan: {
@@ -55,6 +55,11 @@ var AdminApi = function (request) {
             },
             subscribe: function (planId) {
                 return request("POST", "admin/billing/subscribe", { planId: planId });
+            }
+        },
+        booking: {
+            create: function (payload) {
+                return request("POST", "admin/booking", payload);
             }
         }
     };

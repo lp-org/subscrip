@@ -1,7 +1,8 @@
-import { PgJsDatabaseType, room, roomSchema, store } from "db";
+import { NewRoom, PgJsDatabaseType, room, roomSchema, store } from "db";
 import { RESOLVER } from "awilix";
-import { InferModel, and, eq } from "drizzle-orm";
+import { InferModel, and, eq, getTableName } from "drizzle-orm";
 import { CurrentStore } from "../types";
+import { BaseService } from "../interfaces/base-service";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
   currentStore: CurrentStore;
@@ -16,30 +17,36 @@ type BuildQueryType = {
 
 type NewRoomType = typeof room.$inferInsert;
 type RoomType = typeof room.$inferSelect;
-export default class RoomService {
+export default class RoomService extends BaseService {
   static [RESOLVER] = {};
-  protected readonly db_: PgJsDatabaseType;
+  protected override readonly db_: PgJsDatabaseType;
 
-  protected readonly currentStore_: CurrentStore;
+  protected override readonly currentStore_: CurrentStore;
   constructor({ db, currentStore }: InjectedDependencies) {
+    super({
+      db,
+      currentStore,
+    });
     this.db_ = db;
     this.currentStore_ = currentStore;
   }
 
-  async list() {
-    const currentStore = await this.currentStore_;
-    return await this.db_.transaction(async (tx) => {
-      const result = await tx.query.store.findMany({
-        columns: {},
-        with: {
-          room: {
-            limit: 10,
-          },
-        },
-        where: eq(store.id, currentStore.storeId),
-      });
-      return result[0];
-    });
+  async list(filter: any) {
+    // const currentStore = await this.currentStore_;
+    // return await this.db_.transaction(async (tx) => {
+    //   const result = await tx.query.store.findMany({
+    //     columns: {},
+    //     with: {
+    //       room: {
+    //         limit: 10,
+    //       },
+    //     },
+    //     where: eq(store.id, currentStore.storeId),
+    //   });
+    //   return result[0];
+    // });
+
+    return this.listByStore(filter, room, { pricings: true });
   }
 
   async create(payload: NewRoomType) {
@@ -56,6 +63,13 @@ export default class RoomService {
     });
   }
 
+  async get(id: string) {
+    const data = await this.db_
+      .select()
+      .from(room)
+      .where(and(eq(room.id, id)));
+    return data[0];
+  }
   async update(id: string, payload: NewRoomType) {
     const currentStore = await this.currentStore_;
     // check current store

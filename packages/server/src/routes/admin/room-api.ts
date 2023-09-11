@@ -16,7 +16,10 @@ export default class RoomApi {
   @route("/")
   @GET()
   async list(req: Request, res: Response) {
-    const room = await this.roomService_.list();
+    const room = await this.roomService_.list({
+      ...req.query,
+      q: req.query.q && ["name", req.query.q],
+    });
     res.json(room);
   }
 

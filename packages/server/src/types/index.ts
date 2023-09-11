@@ -1,5 +1,7 @@
+import { z } from "zod";
 import StoreService from "../services/StoreService";
 import UserService from "../services/UserService";
+import { createBookingDTO } from "../services/BookingService";
 
 export declare type Subscriber<T = unknown> = (
   data: T,
@@ -34,3 +36,5 @@ export type FilterType = {
 };
 
 export type CurrentStore = ReturnType<StoreService["get"]>;
+
+export type createBookingDTOType = z.infer<typeof createBookingDTO>;

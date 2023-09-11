@@ -7,6 +7,8 @@ import RoomService from "server/src/services/RoomService";
 import PaymentGatewayService from "server/src/services/PaymentGatewayService";
 import PlanService from "server/src/services/PlanService";
 import StoreBillingService from "server/src/services/StoreBillingService";
+import BookingService from "server/src/services/BookingService";
+import { createBookingDTOType } from "server";
 const AdminApi = (request: typeof clientRequest) => {
   return {
     user: {
@@ -48,8 +50,10 @@ const AdminApi = (request: typeof clientRequest) => {
       ): Promise<AxiosResponse<Awaited<ReturnType<RoomService["create"]>>>> {
         return request("POST", "admin/rooms", payload);
       },
-      list(): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>> {
-        return request("GET", "admin/rooms");
+      list(
+        params: any
+      ): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>> {
+        return request("GET", "admin/rooms", params);
       },
     },
     plan: {
@@ -93,6 +97,13 @@ const AdminApi = (request: typeof clientRequest) => {
         AxiosResponse<Awaited<ReturnType<StoreBillingService["subscribePlan"]>>>
       > {
         return request("POST", "admin/billing/subscribe", { planId });
+      },
+    },
+    booking: {
+      create(
+        payload: createBookingDTOType
+      ): Promise<AxiosResponse<Awaited<ReturnType<BookingService["create"]>>>> {
+        return request("POST", "admin/booking", payload);
       },
     },
   };

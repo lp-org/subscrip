@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm";
 import { AnyPgTable, PgTableFn, PgTableWithColumns } from "drizzle-orm/pg-core";
 import { FilterType } from "../types";
-import { SchemaType } from "db";
+import { SchemaType, store } from "db";
 
 export function buildQuery<
   T extends Table<
@@ -85,6 +85,13 @@ export function whereEqQuery(
       if (typeof value === "string" && value.includes(",")) {
         const inValue = value.split(",");
         where.push(inArray(table_[key], inValue));
+      } else if (key === "q") {
+        if (typeof value === "object") {
+          if (!Array.isArray(value)) {
+            throw new Error("query need to be array");
+          }
+          where.push(ilike(table_[value[0]], `%${value[1]}%`));
+        }
       } else where.push(eq(table_[key], value));
     }
   }

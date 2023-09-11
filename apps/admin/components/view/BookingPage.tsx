@@ -11,13 +11,13 @@ const BookingPage = () => {
     return (
       <React.Fragment>
         <div className="my-2">
-          {/* <Button
-            label="New"
+          <Button
+            label="Create Booking"
             icon="pi pi-plus"
             severity="success"
             className=" mr-2"
             onClick={() => push("/bookings/add")}
-          /> */}
+          />
         </div>
       </React.Fragment>
     );

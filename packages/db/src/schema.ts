@@ -15,7 +15,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { array, custom, number, object, string, z } from "zod";
-import { StripeSubscriptionStatusType } from "./types";
+import {
+  BookingPaymentStatusType,
+  StripeSubscriptionStatusType,
+} from "./types";
 
 export const store = pgTable("store", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -86,6 +89,7 @@ export const storeRelations = relations(store, ({ many, one }) => ({
   room: many(room),
   user: many(user),
   storeSubscriptionPlan: one(storeSubscriptionPlan),
+  bookings: many(booking),
 }));
 
 export const planRelations = relations(plan, ({ many, one }) => ({
@@ -231,6 +235,10 @@ export const pricing = pgTable("pricing", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const pricingRelations = relations(pricing, ({ one }) => ({
+  room: one(room, { fields: [pricing.roomId], references: [room.id] }),
+}));
+
 export const booking = pgTable("booking", {
   id: uuid("id").defaultRandom().primaryKey(),
   checkInDate: date("check_in_date").notNull(),
@@ -238,10 +246,15 @@ export const booking = pgTable("booking", {
   roomId: uuid("room_id").references(() => room.id),
   guestCount: integer("guest_count"),
   totalAmount: integer("total_amount").default(0),
-  status: text("status").$type<"pending" | "success" | "cancel">(),
+  status: text("status").$type<"pending" | "booked" | "cancel">(),
+  paymentStatus: text("payment_status")
+    .$type<BookingPaymentStatusType>()
+    .default("not_paid"),
   bookingNo: serial("booking_no"),
   additionalData: jsonb("additional_data"),
   customerId: uuid("customer_id").references(() => customer.id),
+  createdBy: uuid("created_by").references(() => user.id),
+  storeId: uuid("store_id").references(() => store.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
