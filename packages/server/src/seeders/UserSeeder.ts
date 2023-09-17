@@ -1,7 +1,7 @@
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import EventBusService from "../services/EventBusService";
 import { currency, plan } from "db";
-import { CurrencyType, currencies } from "../utils";
+import { CurrencyType, currencies } from "utils-data";
 import { Logger } from "winston";
 import PaymentGatewayService from "../services/PaymentGatewayService";
 

@@ -31,7 +31,7 @@ export type BookingPaymentStatusType =
   | "not_paid"
   | "refunded"
   | "canceled";
-
+type CreateType<T> = Omit<T, "id" | "createdAt" | "updatedAt">;
 export type User = typeof user.$inferSelect;
 export type NewUser = Omit<typeof user.$inferInsert, "id">;
 
@@ -63,5 +63,11 @@ export type NewStore = Omit<InferModel<typeof store, "insert">, "id">;
 
 export type NewRoom = typeof room.$inferInsert;
 
-export type NewStoreSubscriptionPlan =
-  typeof storeSubscriptionPlan.$inferInsert;
+export type NewStoreSubscriptionPlan = CreateType<
+  typeof storeSubscriptionPlan.$inferInsert
+>;
+
+export type CustomerType = Partial<typeof customer.$inferInsert>;
+export type NewCustomerType = CreateType<
+  Omit<typeof customer.$inferInsert, "password">
+>;

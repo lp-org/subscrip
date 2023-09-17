@@ -37,7 +37,7 @@ const SettingsBillings = () => {
         myActiveSubscription?.[0].sPaymentMethodId
       ),
     queryKey: ["billing.getPaymentMethod"],
-    enabled: myActiveSubscription?.[0].sPaymentMethodId ? true : false,
+    enabled: myActiveSubscription?.[0]?.sPaymentMethodId ? true : false,
   });
   const paymentMethod = paymentMethodData?.data;
   const [planId, setPlanId] = useState<string>();
@@ -83,14 +83,14 @@ const SettingsBillings = () => {
             {el.status === "trialing" && (
               <p className="text-gray-500 font-bold">
                 {el.sPaymentMethodId
-                  ? `Your trial period will be ended in ${dayjs().from(
-                      el.nextBillingDate,
-                      true
-                    )} and charge automatically on next billing date`
-                  : `Your trial plan will be ended in ${dayjs().from(
-                      el.nextBillingDate,
-                      true
-                    )}`}
+                  ? `Your trial period will be ended on ${dayjs(
+                      el.nextBillingDate
+                    ).format(
+                      "DD MMM YYYY"
+                    )} and charge automatically on the day`
+                  : `Your trial plan will be ended on ${dayjs(
+                      el.nextBillingDate
+                    ).format("DD MMM YYYY")}`}
               </p>
             )}
             {paymentMethod?.card && (

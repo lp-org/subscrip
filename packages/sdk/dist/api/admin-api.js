@@ -28,6 +28,12 @@ var AdminApi = function (request) {
             create: function (_a) {
                 var name = _a.name;
                 return request("POST", "admin/stores", { name: name });
+            },
+            setting: function () {
+                return request("GET", "admin/stores/settings");
+            },
+            updateSetting: function (payload) {
+                return request("PUT", "admin/stores/settings", payload);
             }
         },
         room: {
@@ -60,6 +66,20 @@ var AdminApi = function (request) {
         booking: {
             create: function (payload) {
                 return request("POST", "admin/booking", payload);
+            },
+            getDisabledBookingDate: function (payload) {
+                return request("POST", "admin/booking/disabledDates", payload);
+            },
+            getRoomBookingPrice: function (payload) {
+                return request("POST", "admin/booking/bookingPrice", payload);
+            }
+        },
+        customer: {
+            list: function (params) {
+                return request("GET", "admin/customer", params);
+            },
+            create: function (payload) {
+                return request("POST", "admin/customer", payload);
             }
         }
     };

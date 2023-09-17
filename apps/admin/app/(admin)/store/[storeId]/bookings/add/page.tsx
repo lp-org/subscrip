@@ -1,5 +1,5 @@
 import React from "react";
-import FormToolbar from "ui/FormToolbar";
+
 import CreateBookingForm from "../../../../../../components/view/Form/CreateBookingForm";
 
 const AddBooking = () => {

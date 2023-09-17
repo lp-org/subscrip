@@ -9,6 +9,8 @@ import isBetween from "dayjs/plugin/isBetween";
 import localeData from "dayjs/plugin/localeData";
 import { and, or, between, eq, gte, isNotNull } from "drizzle-orm";
 import RoomService from "./RoomService";
+import { createBookingDTO } from "utils-data";
+
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
 dayjs.extend(localeData);
@@ -43,12 +45,16 @@ export default class BookingService extends BaseService {
   async create(data: z.infer<typeof createBookingDTO>) {
     const validated = createBookingDTO.parse(data);
     return this.db_.transaction(async (tx) => {
+      const store = await this.currentStore_;
+
       return await tx.insert(booking).values({
         checkInDate: validated.checkInDate,
         checkOutDate: validated.checkOutDate,
         roomId: validated.roomId,
         createdBy: this.currentUser_.userId,
+        totalAmount: validated.totalAmount,
         status: "booked",
+        storeId: store.storeId,
       });
     });
   }
@@ -91,7 +97,7 @@ export default class BookingService extends BaseService {
         ) {
           bookedDays[day] = bookedDays[day] + 1 || 1;
         } else {
-          bookedDays[day] = bookedDays[day] + 1 || 0;
+          bookedDays[day] = bookedDays[day] || 0;
         }
       });
     });
@@ -127,11 +133,8 @@ export default class BookingService extends BaseService {
     if (!isBookingValid) {
       throw new Error("Rooms not available anymore, try to select other date");
     }
-    const roomQuery = await this.db_
-      .select()
-      .from(room)
-      .where(and(eq(room.id, roomId), eq(room.published, true)));
-    const roomData = roomQuery[0];
+    const roomData = await this.roomService_.get(roomId);
+
     const numberOfNight = dayjs(checkOutDate).diff(checkInDate, "day");
 
     let totalPrice = 0;
@@ -186,9 +189,3 @@ export default class BookingService extends BaseService {
     };
   }
 }
-
-export const createBookingDTO = z.object({
-  checkInDate: z.string(),
-  checkOutDate: z.string(),
-  roomId: z.string(),
-});

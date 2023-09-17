@@ -1,14 +1,18 @@
-import { NewRoom, Store, User } from "db";
+import { NewCustomerType, NewRoom, Store, User } from "db";
 import clientRequest from "../client";
 import { AxiosResponse } from "axios";
 import UserService from "server/src/services/UserService";
-import StoreService from "server/src/services/StoreService";
+import StoreService, {
+  updateStoreSettingDTOType,
+} from "server/src/services/StoreService";
 import RoomService from "server/src/services/RoomService";
 import PaymentGatewayService from "server/src/services/PaymentGatewayService";
 import PlanService from "server/src/services/PlanService";
 import StoreBillingService from "server/src/services/StoreBillingService";
 import BookingService from "server/src/services/BookingService";
+import CustomerService from "server/src/services/CustomerService";
 import { createBookingDTOType } from "server";
+import { disabledBookingDateType } from "utils-data";
 const AdminApi = (request: typeof clientRequest) => {
   return {
     user: {
@@ -42,6 +46,18 @@ const AdminApi = (request: typeof clientRequest) => {
         name: string;
       }): Promise<AxiosResponse<Awaited<ReturnType<StoreService["create"]>>>> {
         return request("POST", "admin/stores", { name });
+      },
+      setting(): Promise<
+        AxiosResponse<Awaited<ReturnType<StoreService["getStoreSetting"]>>>
+      > {
+        return request("GET", "admin/stores/settings");
+      },
+      updateSetting(
+        payload: updateStoreSettingDTOType
+      ): Promise<
+        AxiosResponse<Awaited<ReturnType<StoreService["updateStoreSetting"]>>>
+      > {
+        return request("PUT", "admin/stores/settings", payload);
       },
     },
     room: {
@@ -104,6 +120,40 @@ const AdminApi = (request: typeof clientRequest) => {
         payload: createBookingDTOType
       ): Promise<AxiosResponse<Awaited<ReturnType<BookingService["create"]>>>> {
         return request("POST", "admin/booking", payload);
+      },
+      getDisabledBookingDate(
+        payload: disabledBookingDateType
+      ): Promise<
+        AxiosResponse<
+          Awaited<ReturnType<BookingService["getDisabledBookingDate"]>>
+        >
+      > {
+        return request("POST", "admin/booking/disabledDates", payload);
+      },
+
+      getRoomBookingPrice(
+        payload: disabledBookingDateType
+      ): Promise<
+        AxiosResponse<
+          Awaited<ReturnType<BookingService["getRoomBookingPrice"]>>
+        >
+      > {
+        return request("POST", "admin/booking/bookingPrice", payload);
+      },
+    },
+    customer: {
+      list(
+        params: any
+      ): Promise<AxiosResponse<Awaited<ReturnType<CustomerService["list"]>>>> {
+        return request("GET", "admin/customer", params);
+      },
+
+      create(
+        payload: NewCustomerType
+      ): Promise<
+        AxiosResponse<Awaited<ReturnType<CustomerService["create"]>>>
+      > {
+        return request("POST", "admin/customer", payload);
       },
     },
   };

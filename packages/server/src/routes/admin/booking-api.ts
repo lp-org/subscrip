@@ -1,6 +1,7 @@
 import { POST, route } from "awilix-express";
 import { Request, Response } from "express";
 import BookingService from "../../services/BookingService";
+import { disabledBookingDate } from "utils-data";
 
 type InjectedDependencies = {
   bookingService: BookingService;
@@ -19,6 +20,31 @@ export default class BookingApi {
   @route("/")
   @POST()
   async createBooking(req: Request, res: Response) {
-    this.bookingService_.create(req.body);
+    const data = await this.bookingService_.create(req.body);
+    res.json(data);
+  }
+
+  @route("/disabledDates")
+  @POST()
+  async getDisabledDates(req: Request, res: Response) {
+    const validated = disabledBookingDate.parse(req.body);
+    const data = await this.bookingService_.getDisabledBookingDate(
+      validated.roomId,
+      validated.startDate,
+      validated.endDate
+    );
+    res.json(data);
+  }
+
+  @route("/bookingPrice")
+  @POST()
+  async getBookingPrice(req: Request, res: Response) {
+    const validated = disabledBookingDate.parse(req.body);
+    const data = await this.bookingService_.getRoomBookingPrice(
+      validated.roomId,
+      validated.startDate,
+      validated.endDate
+    );
+    res.json(data);
   }
 }

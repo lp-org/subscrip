@@ -1,7 +1,6 @@
 import { z } from "zod";
 import StoreService from "../services/StoreService";
-import UserService from "../services/UserService";
-import { createBookingDTO } from "../services/BookingService";
+import { createBookingDTO } from "utils-data";
 
 export declare type Subscriber<T = unknown> = (
   data: T,

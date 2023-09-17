@@ -12,7 +12,7 @@ import { useAdminRouter } from "../../utils/use-admin-router";
 const RoomPage = () => {
   const { adminClient } = useRequest();
   const { data } = useQuery({
-    queryFn: adminClient.room.list,
+    queryFn: () => adminClient.room.list({}),
     queryKey: ["roomList"],
   });
   const rooms = data?.data.room;

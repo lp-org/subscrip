@@ -64,10 +64,11 @@ export default class RoomService extends BaseService {
   }
 
   async get(id: string) {
+    const currentStore = await this.currentStore_;
     const data = await this.db_
       .select()
       .from(room)
-      .where(and(eq(room.id, id)));
+      .where(and(eq(room.id, id), eq(room.storeId, currentStore.storeId)));
     return data[0];
   }
   async update(id: string, payload: NewRoomType) {

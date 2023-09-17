@@ -12,7 +12,7 @@ export * from "./services";
 export * from "./types";
 export * from "./plugin-service";
 import Express, { json } from "express";
-export * from "./utils";
+
 import { loadControllers, scopePerRequest } from "awilix-express";
 import { errorHandlerMiddleware } from "./middleware/error-handler";
 import passport from "./middleware/passport";
@@ -20,7 +20,7 @@ import session from "./middleware/session";
 import auth from "./middleware/auth";
 import cookieParser from "cookie-parser";
 import { loggerInstance } from "./utils/logger";
-import StoreService from "./services/StoreService";
+
 import {
   PgJsDatabaseType,
   plan,

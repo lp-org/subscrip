@@ -1,14 +1,16 @@
-import { NewRoom, Store, User } from "db";
+import { NewCustomerType, NewRoom, Store, User } from "db";
 import clientRequest from "../client";
 import { AxiosResponse } from "axios";
 import UserService from "server/src/services/UserService";
-import StoreService from "server/src/services/StoreService";
+import StoreService, { updateStoreSettingDTOType } from "server/src/services/StoreService";
 import RoomService from "server/src/services/RoomService";
 import PaymentGatewayService from "server/src/services/PaymentGatewayService";
 import PlanService from "server/src/services/PlanService";
 import StoreBillingService from "server/src/services/StoreBillingService";
 import BookingService from "server/src/services/BookingService";
+import CustomerService from "server/src/services/CustomerService";
 import { createBookingDTOType } from "server";
+import { disabledBookingDateType } from "utils-data";
 declare const AdminApi: (request: typeof clientRequest) => {
     user: {
         get(): Promise<AxiosResponse<User[]>>;
@@ -24,6 +26,8 @@ declare const AdminApi: (request: typeof clientRequest) => {
         create({ name, }: {
             name: string;
         }): Promise<AxiosResponse<Awaited<ReturnType<StoreService["create"]>>>>;
+        setting(): Promise<AxiosResponse<Awaited<ReturnType<StoreService["getStoreSetting"]>>>>;
+        updateSetting(payload: updateStoreSettingDTOType): Promise<AxiosResponse<Awaited<ReturnType<StoreService["updateStoreSetting"]>>>>;
     };
     room: {
         create(payload: NewRoom): Promise<AxiosResponse<Awaited<ReturnType<RoomService["create"]>>>>;
@@ -40,6 +44,12 @@ declare const AdminApi: (request: typeof clientRequest) => {
     };
     booking: {
         create(payload: createBookingDTOType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["create"]>>>>;
+        getDisabledBookingDate(payload: disabledBookingDateType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["getDisabledBookingDate"]>>>>;
+        getRoomBookingPrice(payload: disabledBookingDateType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["getRoomBookingPrice"]>>>>;
+    };
+    customer: {
+        list(params: any): Promise<AxiosResponse<Awaited<ReturnType<CustomerService["list"]>>>>;
+        create(payload: NewCustomerType): Promise<AxiosResponse<Awaited<ReturnType<CustomerService["create"]>>>>;
     };
 };
 export default AdminApi;
