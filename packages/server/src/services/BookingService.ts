@@ -1,4 +1,4 @@
-import { PgJsDatabaseType, booking, pricing, room } from "db";
+import { PgJsDatabaseType, booking, customer, pricing, room } from "db";
 import { RESOLVER } from "awilix";
 import { CurrentStore } from "../types";
 import { BaseService } from "../interfaces/base-service";
@@ -10,6 +10,7 @@ import localeData from "dayjs/plugin/localeData";
 import { and, or, between, eq, gte, isNotNull } from "drizzle-orm";
 import RoomService from "./RoomService";
 import { createBookingDTO } from "utils-data";
+import { whereEqQuery } from "../utils/build-query";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
@@ -20,6 +21,8 @@ type InjectedDependencies = {
   currentUser: Express.User;
   roomService: RoomService;
 };
+
+type BookingType = Partial<typeof booking.$inferSelect>;
 export default class BookingService extends BaseService {
   static [RESOLVER] = {};
   protected override readonly db_: PgJsDatabaseType;
@@ -53,10 +56,28 @@ export default class BookingService extends BaseService {
         roomId: validated.roomId,
         createdBy: this.currentUser_.userId,
         totalAmount: validated.totalAmount,
+        customerId: validated.customerId,
         status: "booked",
         storeId: store.storeId,
       });
     });
+  }
+
+  async list(filter: BookingType) {
+    const where = await this.whereEqQueryByStore(filter, booking);
+    const bookingData = await this.db_
+      .select({
+        id: booking.id,
+        customerEmail: customer.email,
+        bookingNo: booking.bookingNo,
+        checkInDate: booking.checkInDate,
+        checkOutDate: booking.checkOutDate,
+      })
+      .from(booking)
+      .leftJoin(customer, eq(booking.customerId, customer.id))
+      .where(and(...where));
+    const count = await this.listCountByStore(and(...where), booking);
+    return { booking: bookingData, count };
   }
 
   async getDisabledBookingDate(

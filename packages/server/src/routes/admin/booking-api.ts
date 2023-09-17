@@ -1,4 +1,4 @@
-import { POST, route } from "awilix-express";
+import { GET, POST, route } from "awilix-express";
 import { Request, Response } from "express";
 import BookingService from "../../services/BookingService";
 import { disabledBookingDate } from "utils-data";
@@ -15,7 +15,11 @@ export default class BookingApi {
   }
 
   @route("/")
-  async get(req: Request, res: Response) {}
+  @GET()
+  async get(req: Request, res: Response) {
+    const data = await this.bookingService_.list(req.body);
+    res.json(data);
+  }
 
   @route("/")
   @POST()

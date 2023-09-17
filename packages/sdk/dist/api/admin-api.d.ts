@@ -43,6 +43,7 @@ declare const AdminApi: (request: typeof clientRequest) => {
         subscribe(planId: string): Promise<AxiosResponse<Awaited<ReturnType<StoreBillingService["subscribePlan"]>>>>;
     };
     booking: {
+        list(params: any): Promise<AxiosResponse<Awaited<ReturnType<BookingService["list"]>>>>;
         create(payload: createBookingDTOType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["create"]>>>>;
         getDisabledBookingDate(payload: disabledBookingDateType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["getDisabledBookingDate"]>>>>;
         getRoomBookingPrice(payload: disabledBookingDateType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["getRoomBookingPrice"]>>>>;

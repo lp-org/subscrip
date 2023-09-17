@@ -80,6 +80,7 @@ export function whereEqQuery(
   table_: ReturnType<PgTableFn>
 ) {
   const where: SQL[] = [];
+
   if (filter) {
     for (const [key, value] of Object.entries(filter)) {
       if (typeof value === "string" && value.includes(",")) {

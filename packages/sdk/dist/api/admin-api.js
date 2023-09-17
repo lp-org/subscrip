@@ -12,13 +12,13 @@ var AdminApi = function (request) {
                 return request("POST", "admin/auth/login", payload);
             },
             logout: function () {
-                return request("POST", "admin/auth/logout");
+                return request("POST", "admin/users/logout");
             },
             register: function (payload) {
                 return request("POST", "admin/auth/register", payload);
             },
             getSession: function () {
-                return request("GET", "admin/auth/me");
+                return request("GET", "admin/users/me");
             }
         },
         store: {
@@ -64,6 +64,9 @@ var AdminApi = function (request) {
             }
         },
         booking: {
+            list: function (params) {
+                return request("GET", "admin/booking", params);
+            },
             create: function (payload) {
                 return request("POST", "admin/booking", payload);
             },

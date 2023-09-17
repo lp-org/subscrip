@@ -20,7 +20,7 @@ export abstract class BaseService {
   async listByStore<T extends Table>(
     filter: Record<string, unknown>,
     table: T,
-    withRelation?: Record<string, boolean>
+    withRelation?: Record<string, unknown>
   ) {
     const tableName = getTableName(table);
     const currentStore = await this.currentStore_;
@@ -57,5 +57,13 @@ export abstract class BaseService {
       .where(and(where, eq(table.storeId as Column, currentStore.storeId)));
 
     return count.count;
+  }
+
+  async whereEqQueryByStore(
+    filter: Record<string, unknown> | undefined,
+    table_: ReturnType<PgTableFn>
+  ) {
+    const currentStore = await this.currentStore_;
+    return whereEqQuery({ ...filter, storeId: currentStore.storeId }, table_);
   }
 }

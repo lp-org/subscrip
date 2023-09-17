@@ -10,24 +10,16 @@ import auth from "../../middleware/auth";
 
 type InjectedDependencies = {
   db: PgJsDatabaseType;
-  userService: UserService;
   eventBusService: EventBusService;
   authService: AuthService;
 };
 
 @route("/auth")
 export default class CreateUserApi {
-  protected readonly userService_: UserService;
   protected readonly authService_: AuthService;
   protected readonly eventBusService_: EventBusService;
   protected readonly db_: PgJsDatabaseType;
-  constructor({
-    db,
-    userService,
-    eventBusService,
-    authService,
-  }: InjectedDependencies) {
-    this.userService_ = userService;
+  constructor({ db, eventBusService, authService }: InjectedDependencies) {
     this.eventBusService_ = eventBusService;
     this.db_ = db;
     this.authService_ = authService;
@@ -37,7 +29,7 @@ export default class CreateUserApi {
   async createUser(req: Request, res: Response) {
     const { email, password } = req.body;
 
-    const result = await this.userService_.create(req.body, password);
+    const result = await this.authService_.create(req.body, password);
 
     if (result) {
       // @ts-ignore
@@ -65,29 +57,5 @@ export default class CreateUserApi {
     } else {
       res.sendStatus(401);
     }
-  }
-
-  @route("/me")
-  @before([auth()])
-  @GET()
-  async getSession(req: Request, res: Response) {
-    if (req.user && req.user.userId) {
-      const user = await this.userService_.get(req.user.userId);
-      if (!user) {
-        res.sendStatus(401);
-      }
-      res.json(user);
-    } else {
-      res.sendStatus(401);
-    }
-  }
-
-  @route("/logout")
-  @before([auth()])
-  @POST()
-  async logout(req: Request, res: Response) {
-    // @ts-ignore
-    req.session.jwt = {};
-    res.json({});
   }
 }

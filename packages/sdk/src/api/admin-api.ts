@@ -25,7 +25,7 @@ const AdminApi = (request: typeof clientRequest) => {
         return request("POST", "admin/auth/login", payload);
       },
       logout() {
-        return request("POST", "admin/auth/logout");
+        return request("POST", "admin/users/logout");
       },
       register(payload: any) {
         return request("POST", "admin/auth/register", payload);
@@ -33,7 +33,7 @@ const AdminApi = (request: typeof clientRequest) => {
       getSession(): Promise<
         AxiosResponse<Awaited<ReturnType<UserService["get"]>>>
       > {
-        return request("GET", "admin/auth/me");
+        return request("GET", "admin/users/me");
       },
     },
     store: {
@@ -116,6 +116,11 @@ const AdminApi = (request: typeof clientRequest) => {
       },
     },
     booking: {
+      list(
+        params: any
+      ): Promise<AxiosResponse<Awaited<ReturnType<BookingService["list"]>>>> {
+        return request("GET", "admin/booking", params);
+      },
       create(
         payload: createBookingDTOType
       ): Promise<AxiosResponse<Awaited<ReturnType<BookingService["create"]>>>> {

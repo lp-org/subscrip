@@ -70,46 +70,9 @@ export function registerRoutes(container: AwilixContainer) {
   // Loads all controllers in the `routes` folder
   // relative to the current working directory.
   // This is a glob pattern.
-  app.use((req, res, next) => {
+  app.use(async (req, res, next) => {
     req.container.register({
       currentUser: asFunction(() => req.user).scoped(),
-    });
-
-    req.container.register({
-      currentStore: asFunction(async () => {
-        if (req.user && req.user.userId) {
-          const db: PgJsDatabaseType = req.container.resolve("db");
-          const storeId = req.headers.storeid;
-
-          if (storeId && typeof storeId === "string") {
-            const currentStore = await db
-              .select({
-                storeId: store.id,
-                storeUserId: storeToUser.id,
-                plan: plan.key,
-                planStatus: storeSubscriptionPlan.status,
-              })
-              .from(store)
-              .innerJoin(storeToUser, eq(storeToUser.storeId, store.id))
-              .leftJoin(
-                storeSubscriptionPlan,
-                eq(storeToUser.storeId, storeSubscriptionPlan.id)
-              )
-              .leftJoin(plan, eq(storeSubscriptionPlan.planId, plan.id))
-              .where(
-                and(
-                  eq(storeToUser.userId, req.user.userId),
-                  eq(storeToUser.storeId, storeId!)
-                )
-              );
-
-            if (!currentStore[0]) throw new Error("Store not exist");
-            return currentStore[0];
-          }
-          return undefined;
-        }
-        return undefined;
-      }).scoped(),
     });
 
     next();
@@ -118,10 +81,21 @@ export function registerRoutes(container: AwilixContainer) {
     "/admin",
     loadControllers("./routes/admin-public/*.js", { cwd: __dirname })
   );
-
   app.use(
     "/admin",
     auth(),
+    async (req, res, next) => {
+      const currentStore = await getCurrentStore(
+        container,
+        req.headers.storeid as string,
+        req.user?.userId
+      );
+
+      req.container.register({
+        currentStore: asValue(currentStore),
+      });
+      next();
+    },
     loadControllers("./routes/admin/*.js", { cwd: __dirname })
   );
 
@@ -168,4 +142,38 @@ export function registerSeeder(container: AwilixContainer) {
 
     container.build(asFunction((cradle) => new loaded(cradle)).singleton());
   });
+}
+
+async function getCurrentStore(
+  container: AwilixContainer,
+  storeId: string | undefined,
+  userId: string | undefined
+) {
+  const db: PgJsDatabaseType = container.resolve("db");
+  if (!storeId || !userId) {
+    return undefined;
+  }
+  if (storeId && typeof storeId === "string") {
+    const currentStore = await db
+      .select({
+        storeId: store.id,
+        storeUserId: storeToUser.id,
+        plan: plan.key,
+        planStatus: storeSubscriptionPlan.status,
+      })
+      .from(store)
+      .innerJoin(storeToUser, eq(storeToUser.storeId, store.id))
+      .leftJoin(
+        storeSubscriptionPlan,
+        eq(storeToUser.storeId, storeSubscriptionPlan.id)
+      )
+      .leftJoin(plan, eq(storeSubscriptionPlan.planId, plan.id))
+      .where(
+        and(eq(storeToUser.userId, userId), eq(storeToUser.storeId, storeId))
+      );
+
+    if (!currentStore[0]) throw new Error("Store not exist");
+    return currentStore[0];
+  }
+  return undefined;
 }

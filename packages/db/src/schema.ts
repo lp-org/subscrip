@@ -263,6 +263,10 @@ export const bookingRelations = relations(booking, ({ many, one }) => ({
     fields: [booking.customerId],
     references: [customer.id],
   }),
+  store: one(store, {
+    fields: [booking.storeId],
+    references: [store.id],
+  }),
 }));
 
 export const payment = pgTable("payment", {
