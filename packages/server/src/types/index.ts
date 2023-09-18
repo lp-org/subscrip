@@ -34,6 +34,6 @@ export type FilterType = {
   offset?: number;
 };
 
-export type CurrentStore = ReturnType<StoreService["get"]>;
+export type CurrentStore = Awaited<ReturnType<StoreService["get"]>>;
 
 export type createBookingDTOType = z.infer<typeof createBookingDTO>;

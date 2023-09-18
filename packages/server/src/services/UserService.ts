@@ -44,7 +44,7 @@ class UserService extends Model<typeof user> {
 
   async get(userId: string) {
     return await this.db_.transaction(async (tx) => {
-      const currentStore = await this.currentStore_;
+      const currentStore = this.currentStore_;
       let data = await tx
         .select({
           id: user.id,
@@ -79,7 +79,7 @@ class UserService extends Model<typeof user> {
       })
       .from(user)
       .leftJoin(storeToUser, eq(storeToUser.userId, user.id))
-      .where(eq(storeToUser.storeId, (await this.currentStore_).storeId));
+      .where(eq(storeToUser.storeId, this.currentStore_.storeId));
 
     return data;
   }

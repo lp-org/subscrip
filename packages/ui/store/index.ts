@@ -8,8 +8,5 @@ interface BearState {
 
 export const useUiStore = create<BearState>()((set) => ({
   toast: undefined,
-  setToast: (toast) =>
-    set((state) => {
-      return { toast };
-    }),
+  setToast: (toast) => set((state) => ({ toast })),
 }));

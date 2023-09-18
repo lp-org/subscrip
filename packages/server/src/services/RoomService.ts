@@ -32,7 +32,7 @@ export default class RoomService extends BaseService {
   }
 
   async list(filter: any) {
-    // const currentStore = await this.currentStore_;
+    // const currentStore = this.currentStore_;
     // return await this.db_.transaction(async (tx) => {
     //   const result = await tx.query.store.findMany({
     //     columns: {},
@@ -50,7 +50,7 @@ export default class RoomService extends BaseService {
   }
 
   async create(payload: NewRoomType) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     roomSchema.parse(payload);
     return await this.db_.transaction(async (tx) => {
       const result = await tx
@@ -64,7 +64,7 @@ export default class RoomService extends BaseService {
   }
 
   async get(id: string) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     const data = await this.db_
       .select()
       .from(room)
@@ -72,7 +72,7 @@ export default class RoomService extends BaseService {
     return data[0];
   }
   async update(id: string, payload: NewRoomType) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     // check current store
     const roomResult = await this.db_
       .select()

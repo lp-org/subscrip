@@ -27,7 +27,7 @@ export default class StoreApi {
   @route("/settings")
   @GET()
   async storeSetting(req: Request, res: Response) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     const store = await this.storeService_.getStoreSetting(
       currentStore.storeId
     );
@@ -37,7 +37,7 @@ export default class StoreApi {
   @route("/settings")
   @PUT()
   async updateStoreSetting(req: Request, res: Response) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     const store = await this.storeService_.updateStoreSetting(
       currentStore.storeId,
       req.body

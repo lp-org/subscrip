@@ -23,7 +23,7 @@ export abstract class BaseService {
     withRelation?: Record<string, unknown>
   ) {
     const tableName = getTableName(table);
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
 
     const where = and(...whereEqQuery(filter, table));
 
@@ -49,7 +49,7 @@ export abstract class BaseService {
     if (!("storeId" in table)) {
       throw new Error("No store_id column");
     }
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     const [count] = await this.db_
       .select({ count: sql<number>`count(*)`.mapWith(Number) })
       .from(table)
@@ -63,7 +63,7 @@ export abstract class BaseService {
     filter: Record<string, unknown> | undefined,
     table_: ReturnType<PgTableFn>
   ) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     return whereEqQuery({ ...filter, storeId: currentStore.storeId }, table_);
   }
 }

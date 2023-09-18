@@ -49,7 +49,7 @@ export default class StoreBillingService {
   }
 
   async getMySubscription(filter?: NewStoreSubscriptionPlan) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     return await this.db_.transaction(async (tx) => {
       return await tx.query.storeSubscriptionPlan.findMany({
         where: and(
@@ -145,7 +145,7 @@ export default class StoreBillingService {
   async subscribePlan(planId: string) {
     let subscription: Stripe.Response<Stripe.Subscription>;
     let subscriptionId, clientSecret;
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     if (!this.currentUser_.userId) {
       throw new Error("No user");
     }

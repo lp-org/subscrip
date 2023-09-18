@@ -23,7 +23,7 @@ export default class CustomerService extends BaseService {
   }
 
   async create(payload: NewCustomerType) {
-    const currentStore = await this.currentStore_;
+    const currentStore = this.currentStore_;
     return await this.db_.transaction(async (tx) => {
       return await tx
         .insert(customer)

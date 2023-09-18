@@ -2,15 +2,18 @@ import { NewUser, PgJsDatabaseType, user, userSchema } from "db";
 import { RESOLVER } from "awilix";
 import { and, eq } from "drizzle-orm";
 import Scrypt from "scrypt-kdf";
+import PaymentGatewayService from "./PaymentGatewayService";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
+  paymentGatewayService: PaymentGatewayService;
 };
 export default class AuthService {
   static [RESOLVER] = {};
   protected readonly db_: PgJsDatabaseType;
-  paymentGatewayService_: any;
-  constructor({ db }: InjectedDependencies) {
+  protected readonly paymentGatewayService_: PaymentGatewayService;
+  constructor({ db, paymentGatewayService }: InjectedDependencies) {
     this.db_ = db;
+    this.paymentGatewayService_ = paymentGatewayService;
   }
 
   async authenticate(email: string, password: string) {

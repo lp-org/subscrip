@@ -48,8 +48,14 @@ export default class BookingService extends BaseService {
   async create(data: z.infer<typeof createBookingDTO>) {
     const validated = createBookingDTO.parse(data);
     return this.db_.transaction(async (tx) => {
-      const store = await this.currentStore_;
-
+      const valid = await this.getIsBookingValid(
+        validated.roomId,
+        validated.checkInDate,
+        validated.checkOutDate
+      );
+      if (!valid) {
+        throw new Error("Check in date & checkout-out date is not valid");
+      }
       return await tx.insert(booking).values({
         checkInDate: validated.checkInDate,
         checkOutDate: validated.checkOutDate,
@@ -58,7 +64,7 @@ export default class BookingService extends BaseService {
         totalAmount: validated.totalAmount,
         customerId: validated.customerId,
         status: "booked",
-        storeId: store.storeId,
+        storeId: this.currentStore_.storeId,
       });
     });
   }

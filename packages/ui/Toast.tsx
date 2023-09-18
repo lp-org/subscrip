@@ -2,9 +2,10 @@
 import { useEffect, useRef } from "react";
 import { Toast as PrimeToast } from "primereact/toast";
 import { useToast } from "./utils";
+
 const Toast = () => {
   const toasts = useRef<PrimeToast>(null);
-  const { toast } = useToast();
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     if (toasts.current && toast)
@@ -15,7 +16,11 @@ const Toast = () => {
       });
   }, [toast]);
 
-  return <PrimeToast ref={toasts} position="bottom-right" />;
+  return (
+    <>
+      <PrimeToast ref={toasts} position="bottom-right" />
+    </>
+  );
 };
 
 export default Toast;
