@@ -103,6 +103,7 @@ const CreateBookingForm = () => {
   const onSubmit: SubmitHandler<BookingCreateType[0]> = (data) => {
     mutateBooking(data);
   };
+  console.log(form.formState.errors);
   const formData = useWatch({ control: form.control });
   const days = useMemo(() => {
     if (formData.checkOutDate && formData.checkInDate)
@@ -173,7 +174,7 @@ const CreateBookingForm = () => {
                     )}
                   />
                 </div>
-                <div className="col-12  field flex flex-column gap-4">
+                <div className="col-12  field flex flex-column gap-x-4">
                   <label>Check-In & Check-Out Date</label>
                   <Calendar
                     disabled={!formData.roomId}
@@ -196,11 +197,19 @@ const CreateBookingForm = () => {
                           "checkOutDate",
                           e.value[1]
                             ? dayjs(e.value[1]).format("YYYY-MM-DD")
-                            : undefined
+                            : ""
                         );
                       }
                     }}
                     readOnlyInput
+                  />
+                  <InputError
+                    errors={form.formState.errors}
+                    name="checkInDate"
+                  />
+                  <InputError
+                    errors={form.formState.errors}
+                    name="checkOutDate"
                   />
                 </div>
                 <div className="col-12 field flex flex-row align-items-center gap-4">
@@ -322,7 +331,6 @@ const CreateBookingForm = () => {
             <div className="flex mt-2">
               <div>Total Price: </div>
               <div className="ml-auto font-bold">
-                {" "}
                 {formatPrice(bookingPrice?.totalPrice)}
               </div>
             </div>

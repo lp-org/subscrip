@@ -1,4 +1,3 @@
-"use client";
 import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@tanstack/react-query";
 import { NewRoom } from "db";
@@ -15,55 +14,14 @@ import { useRequest } from "../../../../../../utils/adminClient";
 import CurrencyInput from "ui/Input/CurrencyInput";
 import FormToolbar from "ui/FormToolbar";
 import { useToast } from "ui";
+import RoomForm from "../../../../../../components/view/Form/RoomForm";
 
-const AddRoomPage = () => {
-  const { adminClient } = useRequest();
-  const { showToast } = useToast();
-  const { mutate } = useMutation({
-    mutationFn: adminClient.room.create,
-    onSuccess: (res) => {
-      showToast({ severity: "success", detail: res.data.id });
-    },
-  });
-  const form = useForm<NewRoom>({
-    defaultValues: {},
-  });
-  const { register, handleSubmit } = form;
-  const onSubmit: SubmitHandler<NewRoom> = (data) => {
-    mutate(data);
-  };
-  return (
-    <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FormToolbar />
-        <Card title="Add Room" className="w-full">
-          <div className="field flex flex-column mt-4">
-            <label>Room Name</label>
-            <InputText {...register("name", { required: true })} />
-          </div>
-
-          <div className="field flex flex-column mt-4">
-            <Controller
-              name="basePrice"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <>
-                  <label htmlFor={field.name}>Base price</label>
-                  <CurrencyInput
-                    value={field.value}
-                    onAmountChange={(e) => {
-                      field.onChange(e);
-                    }}
-                  />
-                  {InputError({ name: field.name })}
-                </>
-              )}
-            />
-          </div>
-        </Card>
-      </form>
-    </div>
-  );
+const CreateRoomPage = () => {
+  return <RoomForm />;
 };
 
-export default AddRoomPage;
+export default CreateRoomPage;
+
+export const metadata = {
+  title: "Create Room",
+};

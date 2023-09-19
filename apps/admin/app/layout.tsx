@@ -6,8 +6,10 @@ import "primeicons/primeicons.css";
 import "./../components/admin-layout/styles/layout.scss";
 
 import Providers from "../utils/provider";
-import Toast from "ui/Toast";
+
 import "./../styles/index.scss";
+import Toast from "ui/Toast";
+
 interface RootLayoutProps {
   children: React.ReactNode;
 }

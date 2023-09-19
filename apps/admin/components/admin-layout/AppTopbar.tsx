@@ -46,7 +46,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     onSuccess: () => {
       queryClient.invalidateQueries(["me"]);
       showToast({
-        severity: "info",
+        severity: "success",
         detail: "Logout",
       });
       router.refresh();

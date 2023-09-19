@@ -75,6 +75,9 @@ var AdminApi = function (request) {
             },
             getRoomBookingPrice: function (payload) {
                 return request("POST", "admin/booking/bookingPrice", payload);
+            },
+            getBookingCalendar: function (payload) {
+                return request("POST", "admin/booking/calendar", payload);
             }
         },
         customer: {

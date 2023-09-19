@@ -27,7 +27,7 @@ export class LocalFileService extends AbstractFileService {
   async uploadFile(
     file: Express.Multer.File,
     options = {}
-  ): Promise<{ url: string }> {
+  ): Promise<FileServiceUploadResult> {
     const parsedFilename = parse(file.originalname);
 
     const fileKey = `${parsedFilename.name}-${Date.now()}${parsedFilename.ext}`;
@@ -40,7 +40,7 @@ export class LocalFileService extends AbstractFileService {
 
         const fileUrl = `${this.backendUrl_}/${this.uploadDir_}/${fileKey}`;
 
-        resolve({ url: fileUrl });
+        resolve({ url: fileUrl, fileKey });
       });
     });
   }

@@ -10,7 +10,7 @@ import StoreBillingService from "server/src/services/StoreBillingService";
 import BookingService from "server/src/services/BookingService";
 import CustomerService from "server/src/services/CustomerService";
 import { createBookingDTOType } from "server";
-import { disabledBookingDateType } from "utils-data";
+import { disabledBookingDateType, bookingCalendarType } from "utils-data";
 declare const AdminApi: (request: typeof clientRequest) => {
     user: {
         get(): Promise<AxiosResponse<User[]>>;
@@ -47,6 +47,7 @@ declare const AdminApi: (request: typeof clientRequest) => {
         create(payload: createBookingDTOType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["create"]>>>>;
         getDisabledBookingDate(payload: disabledBookingDateType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["getDisabledBookingDate"]>>>>;
         getRoomBookingPrice(payload: disabledBookingDateType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["getRoomBookingPrice"]>>>>;
+        getBookingCalendar(payload: bookingCalendarType): Promise<AxiosResponse<Awaited<ReturnType<BookingService["bookingCalendar"]>>>>;
     };
     customer: {
         list(params: any): Promise<AxiosResponse<Awaited<ReturnType<CustomerService["list"]>>>>;

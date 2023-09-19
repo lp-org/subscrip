@@ -87,6 +87,7 @@ export const storeRelations = relations(store, ({ many, one }) => ({
   booking: many(booking),
   customer: many(customer),
   setting: one(setting),
+  gallery: many(gallery),
 }));
 
 export const planRelations = relations(plan, ({ many, one }) => ({
@@ -197,7 +198,7 @@ export const room = pgTable("room", {
   amenities: json("amenities")
     .default([])
     .$type<{ [x in AmenitiesType]: boolean }>(),
-
+  thumbnail: text("thumbnail"),
   order: serial("order"),
   basePrice: integer("base_price").default(0).notNull(),
   quantity: integer("quantity").default(0),
@@ -328,9 +329,17 @@ export const gallery = pgTable("gallery", {
   id: uuid("id"),
   fileKey: text("file_key"),
   fileType: text("file_type"),
+  size: integer("size"),
   storeId: uuid("store_id").references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
+
+export const galleryRelations = relations(gallery, ({ one }) => ({
+  store: one(store, {
+    fields: [gallery.storeId],
+    references: [store.id],
+  }),
+}));
 
 export const setting = pgTable("setting", {
   id: uuid("id"),

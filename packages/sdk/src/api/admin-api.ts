@@ -12,7 +12,7 @@ import StoreBillingService from "server/src/services/StoreBillingService";
 import BookingService from "server/src/services/BookingService";
 import CustomerService from "server/src/services/CustomerService";
 import { createBookingDTOType } from "server";
-import { disabledBookingDateType } from "utils-data";
+import { disabledBookingDateType, bookingCalendarType } from "utils-data";
 const AdminApi = (request: typeof clientRequest) => {
   return {
     user: {
@@ -144,6 +144,14 @@ const AdminApi = (request: typeof clientRequest) => {
         >
       > {
         return request("POST", "admin/booking/bookingPrice", payload);
+      },
+
+      getBookingCalendar(
+        payload: bookingCalendarType
+      ): Promise<
+        AxiosResponse<Awaited<ReturnType<BookingService["bookingCalendar"]>>>
+      > {
+        return request("POST", "admin/booking/calendar", payload);
       },
     },
     customer: {

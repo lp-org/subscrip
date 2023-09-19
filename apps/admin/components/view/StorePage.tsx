@@ -65,7 +65,7 @@ const CreateStoreForm = () => {
   const { mutate, isLoading } = useMutation({
     mutationFn: adminClient.store.create,
     onSuccess: (res) => {
-      router.push(`/store/${res.data.id}/crud`);
+      router.push(`/store/${res.data.id}/dashboard`);
     },
   });
   return (
@@ -106,7 +106,7 @@ const SelectStoreForm = ({ stores }: { stores: Store[] }) => {
     <Card title="Select store" className="w-full">
       <div className="flex flex-column gap-4">
         {stores?.map((el) => (
-          <Link href={`/store/${el.id}/crud`} key={el.id}>
+          <Link href={`/store/${el.id}/dashboard`} key={el.id}>
             <div className="border-round border-1 border-gray-500 p-4 w-full hover:bg-gray-300 font-bold cursor-pointer">
               {el.name}
             </div>

@@ -1,6 +1,7 @@
 import stream from "stream";
 export type FileServiceUploadResult = {
   url: string;
+  fileKey: string;
 };
 
 export type FileServiceGetUploadStreamResult = {

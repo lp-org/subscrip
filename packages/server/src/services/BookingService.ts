@@ -69,6 +69,32 @@ export default class BookingService extends BaseService {
     });
   }
 
+  async bookingCalendar(startDate: string, endDate: string) {
+    const selectedBooking = await this.db_
+      .select({
+        id: booking.id,
+        checkInDate: booking.checkInDate,
+        checkOutDate: booking.checkOutDate,
+        roomName: room.name,
+        status: booking.status,
+      })
+      .from(booking)
+
+      .where(
+        and(
+          or(
+            between(booking.checkInDate, startDate, endDate),
+            between(booking.checkOutDate, startDate, endDate)
+          ),
+          eq(booking.status, "booked"),
+          eq(booking.storeId, this.currentStore_.storeId)
+        )
+      )
+      .leftJoin(room, eq(room.id, booking.roomId));
+
+    return selectedBooking;
+  }
+
   async list(filter: BookingType) {
     const where = await this.whereEqQueryByStore(filter, booking);
     const bookingData = await this.db_

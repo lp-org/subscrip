@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const createBookingDTO = z.object({
-  checkInDate: z.string(),
-  checkOutDate: z.string(),
+  checkInDate: z.string().min(1, "Please choose check-in date"),
+  checkOutDate: z.string().min(1, "Please choose check-out date"),
   roomId: z.string().min(1, "Please select a room"),
   totalAmount: z.number().nullable(),
   paymentStatus: z.string(),
@@ -25,3 +25,10 @@ export const disabledBookingDate = z.object({
 });
 
 export type disabledBookingDateType = z.infer<typeof disabledBookingDate>;
+
+export const bookingCalendarDTO = z.object({
+  startDate: z.string(),
+  endDate: z.string(),
+});
+
+export type bookingCalendarType = z.infer<typeof bookingCalendarDTO>;
