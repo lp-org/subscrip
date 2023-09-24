@@ -12,11 +12,11 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
   AbstractFileService,
   DeleteFileType,
-  FileServiceUploadResult,
   GetUploadedFileType,
   UploadStreamDescriptorType,
 } from "../interfaces/file";
 import { env } from "process";
+import { FileServiceUploadResult } from "utils-data";
 export class S3Service extends AbstractFileService {
   protected bucket_: string;
   protected s3Url_: string;
@@ -88,16 +88,16 @@ export class S3Service extends AbstractFileService {
       //@ts-ignore
       url: result.Location,
       //@ts-ignore
-      key: result.Key,
+      fileKey: result.Key,
     };
   }
 
-  async delete(file: DeleteFileType): Promise<void> {
+  async delete(fileKey: string): Promise<void> {
     const client = this.getClient();
 
     const params = new DeleteObjectCommand({
       Bucket: this.bucket_,
-      Key: `${file}`,
+      Key: `${fileKey}`,
     });
 
     return new Promise((resolve, reject) => {

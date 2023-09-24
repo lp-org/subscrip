@@ -1,11 +1,10 @@
 // import { authenticate } from './your-auth-middleware'
-import { route, POST, before } from "awilix-express"; // or `awilix-router-core`
+import { route, POST, before, GET, DELETE } from "awilix-express"; // or `awilix-router-core`
 import { Request, Response } from "express";
 import multer from "multer";
 import DefaultFileService from "../../services/FileService";
-import fs from "fs";
-import auth from "../../middleware/auth";
 import GalleryService from "../../services/GalleryService";
+import { deleteFileDTO } from "utils-data";
 
 const upload = multer({ dest: "uploads/" });
 type InjectedDependencies = {
@@ -13,7 +12,7 @@ type InjectedDependencies = {
   galleryService: GalleryService;
 };
 
-@route("/upload")
+@route("/gallery")
 export default class UploadAPI {
   protected readonly fileService_: DefaultFileService;
   protected readonly galleryService_: GalleryService;
@@ -22,10 +21,10 @@ export default class UploadAPI {
     this.galleryService_ = galleryService;
   }
 
-  @route("/")
+  @route("/upload")
   @POST()
   @before(upload.array("files"))
-  @before([auth()])
+  // @before([auth()])
   async uploadImage(req: Request, res: Response) {
     const files = req.files as any;
     if (!files?.length) {
@@ -33,14 +32,25 @@ export default class UploadAPI {
     }
     const result = await Promise.all(
       files.map(async (f: Express.Multer.File) => {
-        return this.fileService_.upload(f).then(async (result) => {
-          fs.unlinkSync(f.path);
-          await this.galleryService_.create(result.fileKey, f.mimetype, f.size);
-          return result;
-        });
+        return await this.galleryService_.create(f);
       })
     );
 
     res.json(result);
+  }
+
+  @route("/")
+  @GET()
+  async listImage(req: Request, res: Response) {
+    const data = await this.galleryService_.list();
+    res.json(data);
+  }
+
+  @route("/")
+  @DELETE()
+  async delete(req: Request, res: Response) {
+    const validated = deleteFileDTO.parse(req.body);
+    await this.galleryService_.delete(validated.fileKey);
+    res.json();
   }
 }

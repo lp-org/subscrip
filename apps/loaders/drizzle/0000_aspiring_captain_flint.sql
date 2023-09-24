@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS "store" (
 	"email" text,
 	"url" text,
 	"active" boolean DEFAULT true,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "store_url_unique" UNIQUE("url")
 );
 --> statement-breakpoint
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS "store_subscription_plan" (
 	"next_billing_date" timestamp,
 	"s_subscription_id" text,
 	"s_payment_method_id" text,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "store_subscription_plan_s_subscription_id_unique" UNIQUE("s_subscription_id")
 );
 --> statement-breakpoint
@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"role" text,
 	"active" boolean DEFAULT true,
 	"s_customer_id" text,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "store_invoice" (
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS "store_invoice" (
 	"amount" integer,
 	"status" text,
 	"currency" text,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "store_invoice_s_invoice_id_unique" UNIQUE("s_invoice_id")
 );
 --> statement-breakpoint
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "permission" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"key" text NOT NULL,
 	"name" text NOT NULL,
-	"created_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
 	"rank" serial NOT NULL
 );
 --> statement-breakpoint
@@ -85,8 +85,8 @@ CREATE TABLE IF NOT EXISTS "customer" (
 	"phone" text,
 	"password" text,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "room" (
@@ -94,7 +94,6 @@ CREATE TABLE IF NOT EXISTS "room" (
 	"name" text NOT NULL,
 	"description" text,
 	"short_description" text,
-	"images" json DEFAULT '[]'::json,
 	"amenities" json DEFAULT '[]'::json,
 	"order" serial NOT NULL,
 	"base_price" integer DEFAULT 0 NOT NULL,
@@ -102,8 +101,15 @@ CREATE TABLE IF NOT EXISTS "room" (
 	"maximum_occupancy" integer DEFAULT 0,
 	"published" boolean DEFAULT false,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "room_images" (
+	"room_id" uuid,
+	"gallery_id" uuid,
+	"position" integer DEFAULT 0,
+	CONSTRAINT room_images_room_id_gallery_id PRIMARY KEY("room_id","gallery_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "pricing" (
@@ -112,8 +118,8 @@ CREATE TABLE IF NOT EXISTS "pricing" (
 	"day_of_week" text,
 	"date" date,
 	"room_id" uuid,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "booking" (
@@ -130,8 +136,8 @@ CREATE TABLE IF NOT EXISTS "booking" (
 	"customer_id" uuid,
 	"created_by" uuid,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "payment" (
@@ -143,8 +149,8 @@ CREATE TABLE IF NOT EXISTS "payment" (
 	"type" text,
 	"reference" text,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "payment_provider" (
@@ -161,29 +167,31 @@ CREATE TABLE IF NOT EXISTS "payment_method" (
 	"connected_account_id" text,
 	"client_key" text,
 	"secret_key" text,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "activity_log" (
-	"id" uuid,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event" text,
 	"payload" json,
 	"user_id" integer NOT NULL,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "gallery" (
-	"id" uuid,
-	"file_key" text,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"url" text NOT NULL,
+	"file_key" text NOT NULL,
 	"file_type" text,
+	"size" integer,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "setting" (
-	"id" uuid,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text,
 	"email" text,
 	"logo" text,
@@ -196,8 +204,8 @@ CREATE TABLE IF NOT EXISTS "setting" (
 	"currency" text,
 	"slider" jsonb DEFAULT '[]'::jsonb,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "setting_store_id_unique" UNIQUE("store_id")
 );
 --> statement-breakpoint
@@ -214,7 +222,7 @@ CREATE TABLE IF NOT EXISTS "contact_us" (
 	"name" text,
 	"message" text,
 	"store_id" uuid,
-	"created_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "batch_job" (
@@ -223,7 +231,7 @@ CREATE TABLE IF NOT EXISTS "batch_job" (
 	"context" jsonb,
 	"result" jsonb,
 	"start_at" timestamp,
-	"created_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
 	"completed_at" timestamp,
 	"failed_at" timestamp
 );
@@ -237,7 +245,7 @@ CREATE TABLE IF NOT EXISTS "notification" (
 	"data" text,
 	"resend_from_id" uuid,
 	"store_id" uuid NOT NULL,
-	"created_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "staged_job" (
@@ -245,7 +253,7 @@ CREATE TABLE IF NOT EXISTS "staged_job" (
 	"event_name" text NOT NULL,
 	"data" jsonb,
 	"options" jsonb DEFAULT '{}'::jsonb,
-	"created_at" timestamp DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -292,6 +300,18 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "room" ADD CONSTRAINT "room_store_id_store_id_fk" FOREIGN KEY ("store_id") REFERENCES "store"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "room_images" ADD CONSTRAINT "room_images_room_id_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "room"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "room_images" ADD CONSTRAINT "room_images_gallery_id_gallery_id_fk" FOREIGN KEY ("gallery_id") REFERENCES "gallery"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

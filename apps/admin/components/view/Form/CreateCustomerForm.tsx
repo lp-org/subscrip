@@ -5,14 +5,11 @@ import { InputText } from "primereact/inputtext";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import InputError from "ui/InputError";
-import {
-  createBookingDTO,
-  newCustomerDTO,
-  newCustomerDTOType,
-} from "utils-data";
+
 import { useRequest } from "../../../utils/adminClient";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "ui";
+import { newCustomerDTOType, newCustomerDTO } from "utils-data";
 
 type CreateCustomerForm = {
   onSave?: (e: any) => void;

@@ -9,6 +9,7 @@ import {
   boolean,
   json,
   jsonb,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import {
@@ -194,11 +195,11 @@ export const room = pgTable("room", {
   name: text("name").notNull(),
   description: text("description"),
   shortDescription: text("short_description"),
-  images: json("images").default([]).$type<string[]>(),
+
   amenities: json("amenities")
     .default([])
     .$type<{ [x in AmenitiesType]: boolean }>(),
-  thumbnail: text("thumbnail"),
+
   order: serial("order"),
   basePrice: integer("base_price").default(0).notNull(),
   quantity: integer("quantity").default(0),
@@ -209,10 +210,29 @@ export const room = pgTable("room", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+export const roomImages = pgTable("room_images", {
+  roomId: uuid("room_id").references(() => room.id, {
+    onDelete: "cascade",
+  }),
+  galleryId: uuid("gallery_id").references(() => gallery.id, {
+    onDelete: "cascade",
+  }),
+  position: integer("position").default(0),
+});
+
+export const roomImagesRelations = relations(roomImages, ({ one }) => ({
+  room: one(room, { fields: [roomImages.roomId], references: [room.id] }),
+  gallery: one(gallery, {
+    fields: [roomImages.galleryId],
+    references: [gallery.id],
+  }),
+}));
+
 export const roomRelations = relations(room, ({ many, one }) => ({
   pricings: many(pricing),
   bookings: many(booking),
   store: one(store, { fields: [room.storeId], references: [store.id] }),
+  images: many(roomImages),
 }));
 
 export const pricing = pgTable("pricing", {
@@ -317,7 +337,7 @@ export const paymentRelations = relations(payment, ({ one }) => ({
 }));
 
 export const activityLog = pgTable("activity_log", {
-  id: uuid("id"),
+  id: uuid("id").defaultRandom().primaryKey(),
   event: text("event"),
   payload: json("payload"),
   userId: integer("user_id").notNull(),
@@ -326,23 +346,25 @@ export const activityLog = pgTable("activity_log", {
 });
 
 export const gallery = pgTable("gallery", {
-  id: uuid("id"),
-  fileKey: text("file_key"),
+  id: uuid("id").defaultRandom().primaryKey(),
+  url: text("url").notNull(),
+  fileKey: text("file_key").notNull(),
   fileType: text("file_type"),
   size: integer("size"),
   storeId: uuid("store_id").references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
-export const galleryRelations = relations(gallery, ({ one }) => ({
+export const galleryRelations = relations(gallery, ({ one, many }) => ({
   store: one(store, {
     fields: [gallery.storeId],
     references: [store.id],
   }),
+  roomImages: many(roomImages),
 }));
 
 export const setting = pgTable("setting", {
-  id: uuid("id"),
+  id: uuid("id").defaultRandom().primaryKey(),
   name: text("name"),
   email: text("email"),
   logo: text("logo"),

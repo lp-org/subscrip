@@ -21,6 +21,22 @@ var AdminApi = function (request) {
                 return request("GET", "admin/users/me");
             }
         },
+        gallery: {
+            upload: function (files) {
+                var data = new FormData();
+                for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
+                    var file = files_1[_i];
+                    data.append("files", file);
+                }
+                return request("POST", "admin/gallery/upload", data);
+            },
+            list: function () {
+                return request("GET", "admin/gallery");
+            },
+            "delete": function (payload) {
+                return request("DELETE", "admin/gallery", payload);
+            }
+        },
         store: {
             list: function () {
                 return request("GET", "admin/stores");
@@ -40,8 +56,27 @@ var AdminApi = function (request) {
             create: function (payload) {
                 return request("POST", "admin/rooms", payload);
             },
+            update: function (_a) {
+                var id = _a.id, payload = _a.payload;
+                return request("PUT", "admin/rooms/".concat(id), payload);
+            },
+            upsertImage: function (_a) {
+                var id = _a.id, payload = _a.payload;
+                return request("PUT", "admin/rooms/images/".concat(id), payload);
+            },
+            deleteImage: function (_a) {
+                var id = _a.id, payload = _a.payload;
+                return request("DELETE", "admin/rooms/images/".concat(id), payload);
+            },
+            reorderImage: function (_a) {
+                var id = _a.id, payload = _a.payload;
+                return request("PUT", "admin/rooms/reorderImages/".concat(id), payload);
+            },
             list: function (params) {
                 return request("GET", "admin/rooms", params);
+            },
+            get: function (id) {
+                return request("GET", "admin/rooms/".concat(id));
             }
         },
         plan: {

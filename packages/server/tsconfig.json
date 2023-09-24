@@ -4,7 +4,9 @@
        "outDir": "./dist",
       "rootDir": "src",
       "noImplicitOverride": true,
-      "experimentalDecorators": true
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "target": "ES5"
     },
     "include": ["./src/**/*", "index.d.ts", "src/types"],
     "exclude": ["dist", "build", "node_modules"]

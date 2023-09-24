@@ -113,8 +113,9 @@ const SelectStoreForm = ({ stores }: { stores: Store[] }) => {
           </Link>
         ))}
       </div>
-
-      <Link href={"/store?action=create"}>Create New Store</Link>
+      <Link href={"/store?action=create"}>
+        <Button className="mt-4 w-full block">Create New Store</Button>
+      </Link>
     </Card>
   );
 };

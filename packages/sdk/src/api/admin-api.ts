@@ -11,8 +11,16 @@ import PlanService from "server/src/services/PlanService";
 import StoreBillingService from "server/src/services/StoreBillingService";
 import BookingService from "server/src/services/BookingService";
 import CustomerService from "server/src/services/CustomerService";
+import GalleryService from "server/src/services/GalleryService";
 import { createBookingDTOType } from "server";
-import { disabledBookingDateType, bookingCalendarType } from "utils-data";
+import {
+  deleteFileType,
+  updateRoomType,
+  updateRoomImageType,
+  disabledBookingDateType,
+  bookingCalendarType,
+} from "utils-data";
+
 const AdminApi = (request: typeof clientRequest) => {
   return {
     user: {
@@ -34,6 +42,30 @@ const AdminApi = (request: typeof clientRequest) => {
         AxiosResponse<Awaited<ReturnType<UserService["get"]>>>
       > {
         return request("GET", "admin/users/me");
+      },
+    },
+    gallery: {
+      upload(
+        files: File[]
+      ): Promise<
+        AxiosResponse<Awaited<ReturnType<GalleryService["create"]>>[]>
+      > {
+        var data = new FormData();
+
+        for (const file of files) {
+          data.append(`files`, file);
+        }
+        return request("POST", "admin/gallery/upload", data);
+      },
+      list(): Promise<
+        AxiosResponse<Awaited<ReturnType<GalleryService["list"]>>>
+      > {
+        return request("GET", "admin/gallery");
+      },
+      delete(
+        payload: deleteFileType
+      ): Promise<AxiosResponse<Awaited<ReturnType<GalleryService["delete"]>>>> {
+        return request("DELETE", "admin/gallery", payload);
       },
     },
     store: {
@@ -66,10 +98,57 @@ const AdminApi = (request: typeof clientRequest) => {
       ): Promise<AxiosResponse<Awaited<ReturnType<RoomService["create"]>>>> {
         return request("POST", "admin/rooms", payload);
       },
+      update({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: updateRoomType;
+      }): Promise<AxiosResponse<Awaited<ReturnType<RoomService["update"]>>>> {
+        return request("PUT", `admin/rooms/${id}`, payload);
+      },
+
+      upsertImage({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: updateRoomImageType;
+      }): Promise<AxiosResponse<Awaited<ReturnType<RoomService["update"]>>>> {
+        return request("PUT", `admin/rooms/images/${id}`, payload);
+      },
+
+      deleteImage({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: updateRoomImageType;
+      }): Promise<AxiosResponse<Awaited<ReturnType<RoomService["update"]>>>> {
+        return request("DELETE", `admin/rooms/images/${id}`, payload);
+      },
+
+      reorderImage({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: updateRoomImageType;
+      }): Promise<
+        AxiosResponse<Awaited<ReturnType<RoomService["reorderImage"]>>>
+      > {
+        return request("PUT", `admin/rooms/reorderImages/${id}`, payload);
+      },
+
       list(
         params: any
       ): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>> {
         return request("GET", "admin/rooms", params);
+      },
+      get(
+        id: string
+      ): Promise<AxiosResponse<Awaited<ReturnType<RoomService["get"]>>>> {
+        return request("GET", `admin/rooms/${id}`);
       },
     },
     plan: {

@@ -55,11 +55,13 @@ class UserService extends Model<typeof user> {
             ...(currentStore ? { storeUserId: storeToUser.id } : {}),
             ...(currentStore ? { id: storeToUser.storeId } : {}),
             ...(currentStore ? { name: store.name } : {}),
+            ...(currentStore ? { currency: setting.currency } : {}),
           },
         })
         .from(user)
         .leftJoin(storeToUser, eq(storeToUser.userId, user.id))
         .leftJoin(store, eq(storeToUser.storeId, store.id))
+        .leftJoin(setting, eq(setting.storeId, store.id))
         .where(
           and(
             eq(user.id, userId),

@@ -1,3 +1,3 @@
 export * from "./currencies";
-
-export * from "./RequestType";
+export * from "./types.shared";
+export * from "./request-type";

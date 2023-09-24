@@ -7,9 +7,11 @@ import { MenuProvider } from "./context/menucontext";
 import Link from "next/link";
 import { AppMenuItem } from "./types/types";
 import { useParams } from "next/navigation";
+import { useAdminRouter } from "../../utils/use-admin-router";
 const AppMenu = () => {
   const { layoutConfig } = useContext(LayoutContext);
   const { storeId } = useParams();
+  const { push } = useAdminRouter();
   const model: AppMenuItem[] = [
     {
       label: "Home",
@@ -23,7 +25,19 @@ const AppMenu = () => {
           label: "Rooms",
           icon: "pi pi-fw pi-home",
           to: `/store/${storeId}/rooms`,
+          command: () => push("/rooms"),
           preventExact: true,
+          items: [
+            {
+              label: "Rooms",
+              to: `/store/${storeId}/rooms`,
+              preventExact: true,
+            },
+            {
+              label: "Collection",
+              to: `/store/${storeId}/collections`,
+            },
+          ],
         },
         {
           label: "Bookings",
@@ -83,6 +97,8 @@ const AppMenu = () => {
     //     {
     //       label: "Auth",
     //       icon: "pi pi-fw pi-user",
+    //       to: `/store/${storeId}/settings/billings`,
+    //       command: () => console.log("command"),
     //       items: [
     //         {
     //           label: "Login",

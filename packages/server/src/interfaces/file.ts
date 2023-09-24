@@ -1,8 +1,5 @@
 import stream from "stream";
-export type FileServiceUploadResult = {
-  url: string;
-  fileKey: string;
-};
+import { FileServiceUploadResult } from "utils-data";
 
 export type FileServiceGetUploadStreamResult = {
   writeStream: stream.PassThrough;
@@ -35,7 +32,7 @@ export abstract class AbstractFileService {
   abstract uploadProtected(
     fileData: Express.Multer.File
   ): Promise<FileServiceUploadResult>;
-  abstract delete(fileData: DeleteFileType): Promise<void>;
+  abstract delete(fileKey: string): Promise<void>;
   abstract getUploadStreamDescriptor(
     fileData: UploadStreamDescriptorType
   ): Promise<FileServiceGetUploadStreamResult>;

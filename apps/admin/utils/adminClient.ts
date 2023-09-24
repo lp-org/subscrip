@@ -2,16 +2,13 @@ import { useParams } from "next/navigation";
 import { AxiosRequestConfig, axiosClient } from "sdk";
 import AdminApi from "sdk/src/api/admin-api";
 import { useMemo } from "react";
-
-const request = axiosClient({
-  baseURL: process.env.BACKEND_URL || "http://localhost:5000",
-});
+import requestClient from "./request-client";
 
 type ClientRequest = {
   storeId?: string;
 };
 
-const clientRequest = ({ storeId }: ClientRequest | undefined) => {
+export const clientRequest = ({ storeId }: ClientRequest) => {
   return (method: string, path = "", payload = {}) => {
     const options: AxiosRequestConfig = {
       method,
@@ -22,7 +19,7 @@ const clientRequest = ({ storeId }: ClientRequest | undefined) => {
     };
     options.params = method === "GET" && payload;
 
-    return request(options);
+    return requestClient(options);
   };
 };
 

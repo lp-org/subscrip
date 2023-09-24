@@ -1,12 +1,11 @@
 "use client";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Calendar, CalendarViewChangeEvent } from "primereact/calendar";
+import { useMutation } from "@tanstack/react-query";
+import { Calendar } from "primereact/calendar";
 import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
 import React, { useEffect, useMemo, useState } from "react";
 import { useRequest } from "../../../utils/adminClient";
 import { AutoComplete } from "primereact/autocomplete";
-import { InputNumber } from "primereact/inputnumber";
 import { Checkbox } from "primereact/checkbox";
 import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import FormToolbar from "ui/FormToolbar";
@@ -16,12 +15,12 @@ import { formatPrice, useToast } from "ui";
 import { Panel } from "primereact/panel";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createBookingDTO } from "utils-data";
+
 import InputError from "ui/InputError";
-import { InputText } from "primereact/inputtext";
 import { PlusIcon } from "lucide-react";
 import { Dialog } from "primereact/dialog";
 import CreateCustomerForm from "./CreateCustomerForm";
+import { createBookingDTO } from "utils-data";
 
 const CreateBookingForm = () => {
   const [dates, setDates] = useState(null);

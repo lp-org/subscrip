@@ -1,12 +1,8 @@
 "use client";
-import { ErrorMessage } from "@hookform/error-message";
-import { useMutation } from "@tanstack/react-query";
-import { NewRoom } from "db";
-import { Button } from "primereact/button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Room, NewRoom } from "db";
 import { Card } from "primereact/card";
-import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
-import { Toolbar } from "primereact/toolbar";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
@@ -14,29 +10,104 @@ import InputError from "ui/InputError";
 
 import CurrencyInput from "ui/Input/CurrencyInput";
 import FormToolbar from "ui/FormToolbar";
-import { useToast } from "ui";
+import { getErrorMessage, useToast } from "ui";
 import { useRequest } from "../../../utils/adminClient";
-import { Panel } from "primereact/panel";
-import { FileUpload } from "primereact/fileupload";
-import useDropzone from "ui/utils/use-dropzone";
+import UploadArea from "../../UploadArea";
+import { useParams } from "next/navigation";
+import { InputNumber } from "primereact/inputnumber";
 
-const RoomForm = () => {
+const RoomForm = ({
+  payload,
+  isLoading,
+}: {
+  payload: Room;
+  isLoading: boolean;
+}) => {
+  const params = useParams();
+  const id: string = params.id;
   const { adminClient } = useRequest();
   const { showToast } = useToast();
+  const invalidateQuries = () => {
+    queryClient.invalidateQueries(["getRoom", id]);
+    queryClient.invalidateQueries(["roomList"]);
+  };
   const { mutate } = useMutation({
     mutationFn: adminClient.room.create,
     onSuccess: (res) => {
-      showToast({ severity: "success", detail: res.data.id });
+      showToast({ severity: "success", detail: "Create Room Successfully" });
     },
   });
-  const form = useForm<NewRoom>({
-    defaultValues: {},
+  const queryClient = useQueryClient();
+  const { mutate: mutateUpdate } = useMutation({
+    mutationFn: adminClient.room.update,
+    onSuccess: (res) => {
+      showToast({ severity: "success", detail: "Update Room Successfully" });
+      invalidateQuries();
+    },
+  });
+
+  const { mutate: mutateUpsertImage } = useMutation({
+    mutationFn: adminClient.room.upsertImage,
+    onSuccess: (res) => {
+      showToast({
+        severity: "success",
+        detail: "Update Room Images Successfully",
+      });
+      invalidateQuries();
+    },
+    onError: (err) => {
+      showToast({
+        severity: "error",
+        detail: getErrorMessage(err),
+      });
+    },
+  });
+
+  const { mutate: mutateReorderImage } = useMutation({
+    mutationFn: adminClient.room.reorderImage,
+    onSuccess: (res) => {
+      showToast({
+        severity: "success",
+        detail: "Updated Images Position Successfully",
+      });
+      invalidateQuries();
+    },
+    onError: (err) => {
+      showToast({
+        severity: "error",
+        detail: getErrorMessage(err),
+      });
+    },
+  });
+
+  const { mutate: mutateDeleteImage } = useMutation({
+    mutationFn: adminClient.room.deleteImage,
+    onSuccess: (res) => {
+      showToast({
+        severity: "success",
+        detail: "Deleted Images Successfully",
+      });
+      invalidateQuries();
+    },
+    onError: (err) => {
+      showToast({
+        severity: "error",
+        detail: getErrorMessage(err),
+      });
+    },
+  });
+  const form = useForm<Room>({
+    defaultValues: { ...payload },
   });
   const { register, handleSubmit } = form;
+
   const onSubmit: SubmitHandler<NewRoom> = (data) => {
-    mutate(data);
+    if (payload) {
+      mutateUpdate({ id, payload: data });
+    } else {
+      mutate(data);
+    }
   };
-  const isDragging = useDropzone();
 
   return (
     <div>
@@ -69,24 +140,50 @@ const RoomForm = () => {
                 />
               </div>
 
-              <Panel header="Media" className="mt-4">
-                <FileUpload
-                  name="demo[]"
-                  url={"/api/upload"}
-                  multiple
-                  accept="image/*"
-                  maxFileSize={1000000}
-                  emptyTemplate={
-                    <p className="m-0">
-                      Drag and drop files to here to upload.
-                    </p>
-                  }
-                  progressBarTemplate={<>asdas</>}
-                  onBeforeDrop={() => console.log("befored")}
-                  onUpload={console.log}
-                  onBeforeUpload={console.log}
+              <Controller
+                control={form.control}
+                name="images"
+                render={({ field }) => (
+                  <>
+                    <UploadArea
+                      title="Media"
+                      onImagesChange={(e) => {
+                        mutateReorderImage({
+                          id,
+                          payload: { g_ids: e.map((el) => el.id) },
+                        });
+                      }}
+                      onNewImagesChange={(e) => {
+                        mutateUpsertImage({
+                          id,
+                          payload: { g_ids: e.map((el) => el.id) },
+                        });
+                      }}
+                      images={field.value}
+                      onDeleteImage={(e) => {
+                        mutateDeleteImage({
+                          id,
+                          payload: { g_ids: e.map((el) => el.id) },
+                        });
+                      }}
+                    />
+                  </>
+                )}
+              />
+              <div className="field flex flex-column mt-4">
+                <label>Quantity</label>
+                <Controller
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <InputNumber
+                      onChange={(e) => field.onChange(e.value)}
+                      value={field.value || 0}
+                    />
+                  )}
                 />
-              </Panel>
+                {/* <InputNumber {...form.register("quantity")} min={0} /> */}
+              </div>
             </Card>
           </div>
           <div className="col-12 md:col-4">

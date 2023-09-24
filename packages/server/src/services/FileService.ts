@@ -1,6 +1,6 @@
+import { FileServiceUploadResult } from "utils-data";
 import {
   AbstractFileService,
-  FileServiceUploadResult,
   UploadStreamDescriptorType,
   FileServiceGetUploadStreamResult,
   GetUploadedFileType,
@@ -22,7 +22,7 @@ class DefaultFileService extends AbstractFileService {
       "Please add a file service plugin in order to manipulate files in Medusa"
     );
   }
-  async delete(fileData: Record<string, any>): Promise<void> {
+  async delete(fileKey: string): Promise<void> {
     throw new Error(
       "Please add a file service plugin in order to manipulate files in Medusa"
     );
@@ -44,6 +44,12 @@ class DefaultFileService extends AbstractFileService {
   async getPresignedDownloadUrl(
     fileData: GetUploadedFileType
   ): Promise<string> {
+    throw new Error(
+      "Please add a file service plugin in order to manipulate files in Medusa"
+    );
+  }
+
+  getFileUrl(fileKey?: string | null): string {
     throw new Error(
       "Please add a file service plugin in order to manipulate files in Medusa"
     );

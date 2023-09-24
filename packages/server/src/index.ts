@@ -12,7 +12,7 @@ export * from "./services";
 export * from "./types";
 export * from "./plugin-service";
 import Express, { json } from "express";
-
+import { ServerResponse } from "http";
 import { loadControllers, scopePerRequest } from "awilix-express";
 import { errorHandlerMiddleware } from "./middleware/error-handler";
 import passport from "./middleware/passport";
@@ -20,7 +20,7 @@ import session from "./middleware/session";
 import auth from "./middleware/auth";
 import cookieParser from "cookie-parser";
 import { loggerInstance } from "./utils/logger";
-
+import { resolve } from "path";
 import {
   PgJsDatabaseType,
   plan,
@@ -52,8 +52,18 @@ export function registerService(container: AwilixContainer) {
 
 export function registerRoutes(container: AwilixContainer) {
   const app = Express();
-
-  const corePath = "./routes/*.js";
+  const buildPath: string = resolve(process.cwd(), "uploads");
+  const setStaticHeaders = (res: ServerResponse) => {
+    res.setHeader("Cache-Control", "max-age=31536000, immutable");
+    res.setHeader("Vary", "Origin, Cache-Control");
+  };
+  const uploadPath = "/" + process.env?.UPLOAD_DIR || "/uploads";
+  app.use(
+    uploadPath,
+    Express.static(buildPath, {
+      setHeaders: setStaticHeaders,
+    })
+  );
   // const coreFull = path.join(__dirname, corePath);
   app.use(
     cors({

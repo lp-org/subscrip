@@ -9,6 +9,7 @@ import Providers from "../utils/provider";
 
 import "./../styles/index.scss";
 import Toast from "ui/Toast";
+import { ConfirmDialog } from "primereact/confirmdialog";
 
 interface RootLayoutProps {
   children: React.ReactNode;

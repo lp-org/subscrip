@@ -3,6 +3,7 @@ module.exports = {
   reactStrictMode: true,
   experimental: {
     serverComponentsExternalPackages: ["awilix", "react-hook-form"],
+    serverActions: true,
   },
   transpilePackages: ["ui"],
   typescript: {
@@ -11,5 +12,12 @@ module.exports = {
     // your project has type errors.
     // !! WARN !!
     ignoreBuildErrors: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        hostname: "localhost",
+      },
+    ],
   },
 };

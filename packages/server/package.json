@@ -34,6 +34,8 @@
         "express-session": "^1.17.3",
         "glob": "^7.1.6",
         "jsonwebtoken": "^9.0.1",
+        "lodash": "^4.17.21",
+        "morphism": "^1.12.3",
         "multer": "^1.4.5-lts.1",
         "passport": "^0.6.0",
         "passport-http-bearer": "^1.0.1",
@@ -45,9 +47,9 @@
         "tsconfig": "*",
         "typescript": "^4.5.2",
         "ulid": "^2.3.0",
+        "utils-data": "*",
         "winston": "^3.10.0",
-        "zod": "^3.21.4",
-        "utils-data": "*"
+        "zod": "^3.21.4"
     },
     "devDependencies": {
         "@types/cookie-parser": "^1.4.3",

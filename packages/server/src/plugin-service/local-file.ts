@@ -3,9 +3,9 @@ import { parse } from "path";
 import {
   AbstractFileService,
   FileServiceGetUploadStreamResult,
-  FileServiceUploadResult,
 } from "../interfaces/file";
 import { env } from "process";
+import { FileServiceUploadResult } from "utils-data";
 export class LocalFileService extends AbstractFileService {
   protected uploadDir_: string;
   protected backendUrl_: string;
@@ -13,7 +13,7 @@ export class LocalFileService extends AbstractFileService {
   constructor() {
     super();
     this.uploadDir_ = env.UPLOAD_DIR || "uploads/images";
-    this.backendUrl_ = env.BACKEND_URL || "http://localhost:9000";
+    this.backendUrl_ = env.BACKEND_URL || "http://localhost:5000";
   }
 
   async upload(file: Express.Multer.File): Promise<FileServiceUploadResult> {
@@ -40,13 +40,22 @@ export class LocalFileService extends AbstractFileService {
 
         const fileUrl = `${this.backendUrl_}/${this.uploadDir_}/${fileKey}`;
 
-        resolve({ url: fileUrl, fileKey });
+        resolve({ url: fileUrl, fileKey: `${this.uploadDir_}/${fileKey}` });
       });
     });
   }
 
-  async delete(file: any): Promise<void> {
-    throw Error("Not implemented");
+  async delete(fileKey: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const filePath = `${process.cwd()}/${fileKey}`;
+
+      if (fs.existsSync(filePath)) {
+        console.log(filePath);
+        fs.unlinkSync(filePath);
+        resolve();
+      }
+      reject("No path found");
+    });
   }
 
   async getUploadStreamDescriptor(
@@ -61,5 +70,10 @@ export class LocalFileService extends AbstractFileService {
 
   async getPresignedDownloadUrl(fileData: any): Promise<string> {
     throw Error("Not implemented");
+  }
+
+  getFileUrl(fileKey?: string) {
+    if (!fileKey) return null;
+    return this.backendUrl_ + fileKey;
   }
 }

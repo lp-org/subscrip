@@ -10,7 +10,6 @@ import localeData from "dayjs/plugin/localeData";
 import { and, or, between, eq, gte, isNotNull } from "drizzle-orm";
 import RoomService from "./RoomService";
 import { createBookingDTO } from "utils-data";
-import { whereEqQuery } from "../utils/build-query";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
@@ -187,6 +186,10 @@ export default class BookingService extends BaseService {
       throw new Error("Rooms not available anymore, try to select other date");
     }
     const roomData = await this.roomService_.get(roomId);
+
+    if (!roomData) {
+      throw new Error("Room not found");
+    }
 
     const numberOfNight = dayjs(checkOutDate).diff(checkInDate, "day");
 
