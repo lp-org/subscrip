@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import {
   useEventListener,
   useMountEffect,
@@ -17,14 +17,56 @@ import { LayoutContext } from "./context/layoutcontext";
 import PrimeReact from "primereact/api";
 import { ChildContainerProps, LayoutState, AppTopbarRef } from "./types/types";
 import { usePathname, useSearchParams } from "next/navigation";
+import { Messages } from "primereact/messages";
+import useAdminUser from "../../utils/use-admin-user";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import Link from "next/link";
+import { useAdminRouter } from "../../utils/use-admin-router";
+dayjs.extend(relativeTime);
 
 const Layout = ({ children }: ChildContainerProps) => {
   const { layoutConfig, layoutState, setLayoutState } =
     useContext(LayoutContext);
   const topbarRef = useRef<AppTopbarRef>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const { data } = useAdminUser();
+  const msgs = useRef(null);
+  const { push } = useAdminRouter();
+  useMountEffect(() => {
+    const storeData = data?.data.store;
+    if (dayjs(storeData?.nextBillingDate).isAfter(dayjs())) {
+      if (storeData?.planStatus === "trialing") {
+        msgs.current.show({
+          sticky: true,
+          severity: "info",
 
-  const router = useRouter();
+          summary: `Your period will end ${dayjs(
+            storeData.nextBillingDate
+          ).from(dayjs())}`,
+          detail: "",
+          content: (
+            <div className="flex flex-column">
+              <div className="font-bold">
+                Your trial period will end{" "}
+                {dayjs(storeData.nextBillingDate).from(dayjs())}
+              </div>
+              {!storeData.sPaymentMethodId && (
+                <div
+                  onClick={() => push("/settings/billings")}
+                  className="cursor-pointer hover:underline"
+                >
+                  Please update your payment method to ensure uninterrupted
+                  service
+                </div>
+              )}
+            </div>
+          ),
+          closable: true,
+        });
+      }
+    }
+  });
   const [bindMenuOutsideClickListener, unbindMenuOutsideClickListener] =
     useEventListener({
       type: "click",
@@ -44,6 +86,7 @@ const Layout = ({ children }: ChildContainerProps) => {
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
   useEffect(() => {
     hideMenu();
     hideProfileMenu();
@@ -150,6 +193,7 @@ const Layout = ({ children }: ChildContainerProps) => {
         <AppTopbar ref={topbarRef} />
         <div ref={sidebarRef} className="layout-sidebar">
           <AppSidebar />
+          <Messages ref={msgs} />
         </div>
         <div className="layout-main-container">
           <div className="layout-main">{children}</div>

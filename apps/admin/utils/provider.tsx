@@ -14,9 +14,8 @@ function Providers({ children }: React.PropsWithChildren) {
     <QueryClientProvider client={client}>
       <PrimeReactProvider>
         <LayoutProvider>
-          {/* <DropzoneProvider> */}
           {children}
-          {/* </DropzoneProvider> */}
+
           <ConfirmDialog />
         </LayoutProvider>
       </PrimeReactProvider>

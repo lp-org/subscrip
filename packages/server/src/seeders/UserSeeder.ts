@@ -49,7 +49,7 @@ export default class UserSeeder {
         price: 200,
         currency: "USD",
         interval: "month",
-        trialPeriod: 7,
+        trialPeriod: 1,
       },
     ];
     if (planList.length == 0) {

@@ -16,7 +16,7 @@ import {
   storeSubscriptionPlan,
   gallery,
 } from "../schema";
-import { InferModel } from "drizzle-orm";
+
 export type StripeSubscriptionStatusType =
   | "incomplete"
   | "incomplete_expired"
@@ -52,29 +52,13 @@ export const bookingFilterSchema = createInsertSchema(booking, {
   roomId: z.string(),
 });
 
-export const currencySchema = createInsertSchema(currency);
-
-export const settingSchema = createInsertSchema(setting);
-export const contactUsSchema = createInsertSchema(contactUs);
-export const stagedJobSchema = createInsertSchema(stagedJob);
-
+export type StagedJob = typeof stagedJob;
 export type Store = typeof store.$inferSelect;
 
-export type NewStore = Omit<InferModel<typeof store, "insert">, "id">;
-
-export type NewRoom = typeof room.$inferInsert;
-
-export type NewStoreSubscriptionPlan = CreateType<
-  typeof storeSubscriptionPlan.$inferInsert
->;
-
-export type CustomerType = Partial<typeof customer.$inferInsert>;
-export type NewCustomerType = CreateType<
-  Omit<typeof customer.$inferInsert, "password">
->;
+export type Customer = typeof customer.$inferSelect;
 
 export type Gallery = typeof gallery.$inferSelect;
 
 export type Room = {
   images: Gallery[];
-} & NewRoom;
+} & typeof room.$inferSelect;

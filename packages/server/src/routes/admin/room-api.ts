@@ -16,10 +16,17 @@ export default class RoomApi {
   @route("/")
   @GET()
   async list(req: Request, res: Response) {
-    const room = await this.roomService_.list({
-      ...req.query,
-      q: req.query.q && ["name", req.query.q],
-    });
+    const { offset, limit, ...rest } = req.query;
+    const room = await this.roomService_.list(
+      {
+        ...rest,
+        q: req.query.q && ["name", req.query.q],
+      },
+      {
+        limit: parseInt(req.query?.limit as string) as number,
+        offset: parseInt(req.query?.offset as string) as number,
+      }
+    );
     res.json(room);
   }
 

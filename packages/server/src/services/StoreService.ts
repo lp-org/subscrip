@@ -1,22 +1,39 @@
 import {
   PgJsDatabaseType,
-  User,
   plan,
   setting,
   store,
+  storeSite,
   storeSubscriptionPlan,
   storeToUser,
-  user,
 } from "db";
 import { RESOLVER } from "awilix";
-import { InferModel, and, eq, sql } from "drizzle-orm";
-import { CurrentStore } from "../types";
+import {
+  InferModel,
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  sql,
+} from "drizzle-orm";
 import PaymentGatewayService from "./PaymentGatewayService";
 import UserService from "./UserService";
 import { string, z } from "zod";
+import { CurrentStore } from "../types";
+import { groupBy, values } from "lodash";
+import dayjs from "dayjs";
+import {
+  updateStoreSettingDTO,
+  updateStoreSettingDTOType,
+  updateStoreSiteDTO,
+  updateStoreSiteType,
+} from "utils-data";
+
 type InjectedDependencies = {
   db: PgJsDatabaseType;
   currentUser: Express.User;
+  currentStore: CurrentStore;
   paymentGatewayService: PaymentGatewayService;
   userService: UserService;
 };
@@ -29,34 +46,44 @@ export default class StoreService {
   protected readonly currentUser_: Express.User;
   protected readonly paymentGatewayService_: PaymentGatewayService;
   protected readonly userService_: UserService;
+  protected readonly currentStore_: CurrentStore;
 
   constructor({
     db,
     currentUser,
     paymentGatewayService,
     userService,
+    currentStore,
   }: InjectedDependencies) {
     this.db_ = db;
     this.currentUser_ = currentUser;
     this.paymentGatewayService_ = paymentGatewayService;
     this.userService_ = userService;
+    this.currentStore_ = currentStore;
   }
 
   async list() {
+    const { ...rest } = getTableColumns(store);
+    const { ...restStoreSubscriptionPlan } = getTableColumns(
+      storeSubscriptionPlan
+    );
     return await this.db_.transaction(async (tx) => {
       const storeUser = await tx
-        .select()
+        .select({ ...rest, name: setting.name })
         .from(store)
         .innerJoin(storeToUser, eq(storeToUser.storeId, store.id))
+        .innerJoin(setting, eq(setting.storeId, store.id))
+
         .where(eq(storeToUser.userId, this.currentUser_.userId!));
 
-      return storeUser.map(({ store }) => store);
+      return storeUser;
     });
   }
   async get(storeId: string) {
     return await this.db_.transaction(async (tx) => {
       const storeUser = await tx
         .select({
+          name: setting.name,
           storeId: store.id,
           storeUserId: storeToUser.id,
           plan: plan.key,
@@ -84,7 +111,7 @@ export default class StoreService {
       const storeSetting = await tx
         .select({
           id: store.id,
-          name: store.name,
+          name: setting.name,
           currency: setting.currency,
           email: setting.email,
           phone: setting.phone,
@@ -94,11 +121,12 @@ export default class StoreService {
           favicon: setting.favicon,
           logo: setting.logo,
           ogimage: setting.ogimage,
+          url: storeSite.url,
           createdAt: store.createdAt,
-          screatedAt: setting.createdAt,
         })
         .from(store)
         .leftJoin(setting, eq(setting.storeId, store.id))
+        .leftJoin(storeSite, eq(storeSite.storeId, store.id))
         .where(and(eq(store.id, storeId)));
       return storeSetting[0];
     });
@@ -109,30 +137,36 @@ export default class StoreService {
     payload: updateStoreSettingDTOType
   ) {
     return await this.db_.transaction(async (tx) => {
-      updateStoreSettingDTO.parse(payload);
-      const { name, email } = payload;
-      const storeResult = await tx
-        .update(store)
-        .set({
-          name,
-          email,
-          updatedAt: new Date(),
-        })
-
-        .where(and(eq(store.id, storeId)));
+      const validated = updateStoreSettingDTO.parse(payload);
+      const { ...validatedRest } = validated;
 
       const storeSetting = await tx
         .insert(setting)
         .values({
-          ...payload,
+          ...validatedRest,
           storeId: storeId,
         })
         .onConflictDoUpdate({
           target: [setting.storeId],
-          set: { ...payload, storeId: storeId, updatedAt: new Date() },
+          set: {
+            ...validatedRest,
+            storeId: storeId,
+            updatedAt: new Date(),
+          },
         })
         .returning();
+      console.log(validatedRest);
       return storeSetting[0];
+    });
+  }
+
+  async updateStoreSite(storeId: string, payload: updateStoreSiteType) {
+    return await this.db_.transaction(async (tx) => {
+      const validated = updateStoreSiteDTO.parse(payload);
+      return await tx
+        .update(storeSite)
+        .set({ ...validated })
+        .returning();
     });
   }
 
@@ -151,17 +185,20 @@ export default class StoreService {
       }
       const subscription = await this.paymentGatewayService_.createSubscription(
         user.sCustomerId,
-        starterPlan.sPlanId
+        starterPlan.sPlanId,
+        true
       );
 
-      const newStore = await tx
-        .insert(store)
-        .values({
-          name,
-        })
-        .returning({
-          id: store.id,
-        });
+      const newStore = await tx.insert(store).values({}).returning({
+        id: store.id,
+      });
+
+      await tx.insert(setting).values({ name, storeId: newStore[0].id });
+
+      await tx.insert(storeSite).values({
+        url: `${name.replace(/\s+/g, "-").trim()}-${dayjs().unix()}`,
+        storeId: newStore[0].id,
+      });
 
       await tx.insert(storeSubscriptionPlan).values({
         planId: starterPlan.id,
@@ -189,26 +226,21 @@ export default class StoreService {
 
   async update(payload: UpdateStore) {
     const data = await this.db_.insert(store).values({
-      name: payload.name,
       active: payload.active,
       updatedAt: new Date(),
     });
 
     return data[0];
   }
+
+  async retrieveByUrl(url: string) {
+    const columns = getTableColumns(store);
+    const storeData = await this.db_
+      .select({ ...columns })
+      .from(store)
+      .leftJoin(storeSite, eq(storeSite.storeId, store.id))
+      .where(eq(storeSite.url, url));
+
+    return storeData[0] || null;
+  }
 }
-
-export const updateStoreSettingDTO = z.object({
-  name: string().optional(),
-  currency: string().optional().nullable(),
-  email: string().optional().nullable(),
-  phone: string().optional().nullable(),
-  address: string().optional().nullable(),
-  facebook: string().optional().nullable(),
-  instagram: string().optional().nullable(),
-  favicon: string().optional().nullable(),
-  logo: string().optional().nullable(),
-  ogimage: string().optional().nullable(),
-});
-
-export type updateStoreSettingDTOType = z.infer<typeof updateStoreSettingDTO>;

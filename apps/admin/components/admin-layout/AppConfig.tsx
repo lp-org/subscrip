@@ -11,6 +11,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AppConfigProps, LayoutConfig, LayoutState } from "./types/types";
 import { LayoutContext } from "./context/layoutcontext";
 import { Moon, Sun } from "lucide-react";
+import { useIsActiveStore } from "../../utils/use-is-active-store";
 
 const AppConfig = (props: AppConfigProps) => {
   const [scales] = useState([12, 13, 14, 15, 16]);
@@ -86,16 +87,18 @@ const AppConfig = (props: AppConfigProps) => {
     applyScale();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layoutConfig.scale]);
-
+  const isActiveStore = useIsActiveStore();
   return (
     <>
-      <button
-        className="layout-config-button config-link"
-        type="button"
-        onClick={onConfigButtonClick}
-      >
-        <i className="pi pi-cog"></i>
-      </button>
+      {isActiveStore && (
+        <button
+          className="layout-config-button config-link"
+          type="button"
+          onClick={onConfigButtonClick}
+        >
+          <i className="pi pi-cog"></i>
+        </button>
+      )}
 
       <Sidebar
         visible={layoutState.configSidebarVisible}

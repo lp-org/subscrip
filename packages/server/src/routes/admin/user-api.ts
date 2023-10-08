@@ -6,6 +6,7 @@ import EventBusService from "../../services/EventBusService";
 
 import { PgJsDatabaseType } from "db";
 import AuthService from "../../services/AuthService";
+import auth from "../../middleware/auth";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
   userService: UserService;
@@ -60,6 +61,7 @@ export default class UserAPI {
   async getSession(req: Request, res: Response) {
     if (req.user && req.user.userId) {
       const user = await this.userService_.get(req.user.userId);
+
       if (!user) {
         res.sendStatus(401);
       }

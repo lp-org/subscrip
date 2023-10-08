@@ -1,11 +1,4 @@
-import {
-  NewRoom,
-  PgJsDatabaseType,
-  room,
-  roomImages,
-  roomSchema,
-  store,
-} from "db";
+import { PgJsDatabaseType, room, roomImages, roomSchema, store } from "db";
 import { RESOLVER } from "awilix";
 import {
   InferModel,
@@ -20,6 +13,8 @@ import { CurrentStore } from "../types";
 import { BaseService } from "../interfaces/base-service";
 import GalleryService from "./GalleryService";
 import {
+  PageConfig,
+  createRoomDTO,
   createRoomType,
   updateRoomDTO,
   updateRoomImageType,
@@ -33,15 +28,6 @@ type InjectedDependencies = {
   galleryService: GalleryService;
 };
 
-type BuildQueryType = {
-  offset?: number;
-  limit?: number;
-  orderBy?: string;
-  orderDirection?: "ASC" | "DESC";
-};
-
-type NewRoomType = typeof room.$inferInsert;
-type RoomType = typeof room.$inferSelect;
 export default class RoomService extends BaseService {
   static [RESOLVER] = {};
   protected override readonly db_: PgJsDatabaseType;
@@ -57,7 +43,7 @@ export default class RoomService extends BaseService {
     this.galleryService_ = galleryService;
   }
 
-  async list(filter: any) {
+  async list(filter: any, pageConfig?: PageConfig) {
     // const currentStore = this.currentStore_;
     // return await this.db_.transaction(async (tx) => {
     //   const result = await tx.query.store.findMany({
@@ -90,25 +76,30 @@ export default class RoomService extends BaseService {
     //   },
     // });
 
-    return await this.listByStore(filter, room, {
-      pricings: true,
-      images: {
-        with: {
-          gallery: true,
-        },
-        columns: {
-          roomId: false,
-          galleryId: false,
-        },
+    return await this.listByStore(
+      filter,
+      room,
+      {
+        pricings: true,
+        images: {
+          with: {
+            gallery: true,
+          },
+          columns: {
+            roomId: false,
+            galleryId: false,
+          },
 
-        orderBy: asc(roomImages.position),
+          orderBy: asc(roomImages.position),
+        },
       },
-    });
+      pageConfig
+    );
   }
 
   async create(payload: createRoomType) {
     const currentStore = this.currentStore_;
-    roomSchema.parse(payload);
+    const validated = createRoomDTO.parse(payload);
     return await this.db_.transaction(async (tx) => {
       const roomData = await tx
         .insert(room)
@@ -119,14 +110,17 @@ export default class RoomService extends BaseService {
         .returning({
           id: room.id,
         });
-      const newRoomImages = payload.images.map((el, i) => ({
-        roomId: roomData[0].id,
-        galleryId: el,
-        position: i,
-      }));
 
-      await tx.insert(roomImages).values(newRoomImages);
+      if (validated.images) {
+        const newRoomImages =
+          validated.images.map((el, i) => ({
+            roomId: roomData[0].id,
+            galleryId: el,
+            position: i,
+          })) || [];
 
+        await tx.insert(roomImages).values(newRoomImages);
+      }
       return roomData[0];
     });
   }

@@ -49,7 +49,7 @@ export default class PaymentGatewayService {
     return customer.id;
   }
 
-  async createSubscription(customerId: string, planId: string) {
+  async createSubscription(customerId: string, planId: string, trial: boolean) {
     const plan = await this.stripeApi.subscriptions.create({
       customer: customerId,
       items: [
@@ -60,7 +60,12 @@ export default class PaymentGatewayService {
       payment_behavior: "default_incomplete",
       payment_settings: { save_default_payment_method: "on_subscription" },
       expand: ["latest_invoice.payment_intent", "pending_setup_intent"],
-      trial_from_plan: true,
+      trial_from_plan: trial,
+      trial_settings: {
+        end_behavior: {
+          missing_payment_method: "cancel",
+        },
+      },
     });
     return plan;
   }
@@ -70,6 +75,11 @@ export default class PaymentGatewayService {
       expand: ["latest_invoice.payment_intent", "pending_setup_intent"],
     });
 
+    return plan;
+  }
+
+  async cancelSubscription(subscriptionId: string) {
+    const plan = await this.stripeApi.subscriptions.cancel(subscriptionId);
     return plan;
   }
 

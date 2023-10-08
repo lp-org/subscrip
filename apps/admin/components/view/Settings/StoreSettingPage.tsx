@@ -10,12 +10,14 @@ import StoreCurrency from "./StoreSetting/Currency";
 import { useQuery } from "@tanstack/react-query";
 import { useRequest } from "../../../utils/adminClient";
 import { useStoreSetting } from "./StoreSetting/useStoreSetting";
+import Site from "./StoreSetting/Site";
 
 const StoreSettingPage = () => {
   return (
     <Card title="Store Settings">
       <Profile />
       <StoreCurrency />
+      <Site />
     </Card>
   );
 };

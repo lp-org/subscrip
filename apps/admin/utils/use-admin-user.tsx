@@ -10,6 +10,7 @@ const useAdminUser = () => {
     onError: (err: any) => {
       if (err?.response?.status === 401) router.push("/login");
     },
+
     retry: false,
   });
 

@@ -1,4 +1,4 @@
-import { GET, POST, route } from "awilix-express";
+import { GET, POST, before, route } from "awilix-express";
 import { Request, Response } from "express";
 import CustomerService from "../../services/CustomerService";
 

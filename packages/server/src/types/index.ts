@@ -1,7 +1,7 @@
 import { z } from "zod";
 import StoreService from "../services/StoreService";
 import { createBookingDTO } from "utils-data";
-
+import { getCurrentStore } from "db";
 export declare type Subscriber<T = unknown> = (
   data: T,
   eventName: string
@@ -34,6 +34,8 @@ export type FilterType = {
   offset?: number;
 };
 
-export type CurrentStore = Awaited<ReturnType<StoreService["get"]>>;
+export type CurrentStore = NonNullable<
+  Awaited<ReturnType<typeof getCurrentStore>>
+>;
 
 export type createBookingDTOType = z.infer<typeof createBookingDTO>;

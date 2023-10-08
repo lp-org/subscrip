@@ -1,6 +1,7 @@
 import { PgJsDatabaseType, setting } from "db";
 import Model from "../interfaces/model";
 import { RESOLVER } from "awilix";
+import { eq } from "drizzle-orm";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
 };

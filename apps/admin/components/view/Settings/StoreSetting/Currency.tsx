@@ -1,13 +1,5 @@
-import {
-  StoreIcon,
-  PhoneIcon,
-  MailIcon,
-  Currency,
-  CircleDollarSign,
-} from "lucide-react";
+import { CircleDollarSign } from "lucide-react";
 import { Button } from "primereact/button";
-import { Card } from "primereact/card";
-import { InputText } from "primereact/inputtext";
 import { useEffect, useState } from "react";
 import { useStoreSetting } from "./useStoreSetting";
 import { Dropdown } from "primereact/dropdown";

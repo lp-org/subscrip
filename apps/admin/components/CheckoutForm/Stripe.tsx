@@ -3,22 +3,24 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { useState } from "react";
 import { Skeleton } from "primereact/skeleton";
+import { useQueryClient } from "@tanstack/react-query";
 const CheckoutForm = ({
   subscriptionId,
-  isSetup,
 }: {
   subscriptionId: string;
-  isSetup: boolean;
+  // isSetup: boolean;
 }) => {
   const stripe = useStripe();
   const elements = useElements();
   const params = useParams();
+  const query = useSearchParams();
   const storeId = params.storeId as string;
   const [errorMessage, setErrorMessage] = useState<string>();
+  const queryClient = useQueryClient();
   const handleSubmit = async (event) => {
     // We don't want to let default form submission happen here,
     // which would refresh the page.
@@ -29,22 +31,20 @@ const CheckoutForm = ({
       // Make sure to disable form submission until Stripe.js has loaded.
       return;
     }
-
-    const result = isSetup
-      ? await stripe.confirmSetup({
-          //`Elements` instance that was used to create the Payment Element
-          elements,
-          confirmParams: {
-            return_url: `${location.protocol}//${location.host}/store/${storeId}/settings/billings/complete?s_subscription_id=${subscriptionId}`,
-          },
-        })
-      : await stripe.confirmPayment({
-          //`Elements` instance that was used to create the Payment Element
-          elements,
-          confirmParams: {
-            return_url: `${location.protocol}//${location.host}/store/${storeId}/settings/billings/complete?s_subscription_id=${subscriptionId}`,
-          },
-        });
+    let action;
+    if (query.get("status") === "trialing") {
+      action = stripe.confirmSetup;
+    } else {
+      action = stripe.confirmPayment;
+    }
+    queryClient.clear();
+    const result = await action({
+      //`Elements` instance that was used to create the Payment Element
+      elements,
+      confirmParams: {
+        return_url: `${location.protocol}//${location.host}/store/${storeId}/settings/billings/complete?s_subscription_id=${subscriptionId}`,
+      },
+    });
 
     if (result.error) {
       // Show error to your customer (for example, payment details incomplete)

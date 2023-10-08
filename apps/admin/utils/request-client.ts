@@ -1,5 +1,5 @@
 import { axiosClient } from "sdk";
 
 export default axiosClient({
-  baseURL: process.env.BACKEND_URL || "http://localhost:5000",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000",
 });

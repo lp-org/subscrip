@@ -1,11 +1,9 @@
-import { PgJsDatabaseType, stagedJob, stagedJobSchema } from "db";
-import z from "zod";
+import { PgJsDatabaseType, StagedJob, stagedJob } from "db";
 import { isString } from "../utils/is-string";
 import { sleep } from "../utils/sleep";
 import { inArray } from "drizzle-orm";
 import { EmitData, Subscriber, SubscriberContext } from "../types";
 import { IEventBusModuleService } from "../interfaces/event-bus-module";
-type StagedJob = z.infer<typeof stagedJobSchema>;
 
 type InjectedDependencies = {
   db: PgJsDatabaseType;

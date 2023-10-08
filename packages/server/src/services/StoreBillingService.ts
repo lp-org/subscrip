@@ -1,8 +1,8 @@
 import {
-  NewStoreSubscriptionPlan,
   PgJsDatabaseType,
   StripeSubscriptionStatusType,
   plan,
+  store,
   storeInvoice,
   storeSubscriptionPlan,
 } from "db";
@@ -11,7 +11,7 @@ import { CurrentStore } from "../types";
 import PaymentGatewayService from "./PaymentGatewayService";
 import UserService from "./UserService";
 import PlanService from "./PlanService";
-import { SQL, and, eq, inArray } from "drizzle-orm";
+import { SQL, and, desc, eq, inArray } from "drizzle-orm";
 import Stripe from "stripe";
 import { PgTableFn } from "drizzle-orm/pg-core";
 import { whereEqQuery } from "../utils/build-query";
@@ -48,7 +48,7 @@ export default class StoreBillingService {
     this.planService_ = planService;
   }
 
-  async getMySubscription(filter?: NewStoreSubscriptionPlan) {
+  async getMySubscription(filter?: any) {
     const currentStore = this.currentStore_;
     return await this.db_.transaction(async (tx) => {
       return await tx.query.storeSubscriptionPlan.findMany({
@@ -120,6 +120,7 @@ export default class StoreBillingService {
     sPaymentMethodId: string;
   }) {
     await this.db_.transaction(async (tx) => {
+      let active = true;
       const planData = await this.db_.query.plan.findFirst({
         where: eq(plan.sPlanId, sPlanId),
       });
@@ -127,7 +128,7 @@ export default class StoreBillingService {
         throw new Error("No plan found");
       }
       if (planData) {
-        await tx
+        const result = await tx
           .update(storeSubscriptionPlan)
           .set({
             status,
@@ -137,48 +138,70 @@ export default class StoreBillingService {
             planId: planData.id,
             updatedAt: new Date(),
           })
-          .where(eq(storeSubscriptionPlan.sSubscriptionId, sSubscriptionId));
+          .where(eq(storeSubscriptionPlan.sSubscriptionId, sSubscriptionId))
+          .returning();
+        if (
+          status === "canceled" ||
+          (status === "incomplete_expired" && result[0])
+        ) {
+          active = false;
+        }
+        await tx
+          .update(store)
+          .set({ active, plan: planData.name, planStatus: status })
+          .where(eq(store.id, result[0]?.storeId!));
       }
     });
   }
 
   async subscribePlan(planId: string) {
-    let subscription: Stripe.Response<Stripe.Subscription>;
-    let subscriptionId, clientSecret;
-    const currentStore = this.currentStore_;
-    if (!this.currentUser_.userId) {
-      throw new Error("No user");
-    }
-    const user = await this.userService_.get(this.currentUser_.userId);
-    if (!user || !user.sCustomerId) {
-      throw new Error("User or customerId not found");
-    }
-    const planData = await this.planService_.get(planId);
-    if (!planData || !planData.sPlanId) {
-      throw new Error("Plan not found");
-    }
+    return await this.db_.transaction(async (tx) => {
+      let subscription: Stripe.Response<Stripe.Subscription>;
+      let subscriptionId, storeSubscriptionPlanId;
+      let trial = true;
+      const currentStore = this.currentStore_;
+      if (!this.currentUser_.userId) {
+        throw new Error("No user");
+      }
+      const user = await this.userService_.get(this.currentUser_.userId);
+      if (!user || !user.sCustomerId) {
+        throw new Error("User or customerId not found");
+      }
+      const planData = await this.planService_.get(planId);
+      if (!planData || !planData.sPlanId) {
+        throw new Error("Plan not found");
+      }
 
-    const currentSubscription =
-      await this.db_.query.storeSubscriptionPlan.findFirst({
-        where: and(
-          eq(storeSubscriptionPlan.storeId, currentStore.storeId),
-          inArray(storeSubscriptionPlan.status, [
-            "active",
-            "incomplete",
-            "trialing",
-          ])
-        ),
-      });
-    if (currentSubscription?.sSubscriptionId) {
-      subscriptionId = currentSubscription.sSubscriptionId;
-      subscription = await this.paymentGatewayService_.getSubscription(
-        subscriptionId
-      );
-      subscription.latest_invoice;
-    } else {
+      const currentSubscription =
+        await tx.query.storeSubscriptionPlan.findFirst({
+          where: and(eq(storeSubscriptionPlan.storeId, currentStore.storeId)),
+          orderBy: desc(storeSubscriptionPlan.createdAt),
+        });
+
+      if (!currentSubscription?.sSubscriptionId) {
+        throw new Error("No Subsciption ID");
+      }
+
+      if (currentSubscription) {
+        // if store has create subscription before, no trial allowed
+        trial = false;
+      }
+
+      if (
+        currentSubscription?.status === "active" ||
+        currentSubscription?.status === "trialing"
+      ) {
+        throw new Error("You already have a active plan.");
+      } else if (currentSubscription?.status !== "canceled") {
+        await this.paymentGatewayService_.cancelSubscription(
+          currentSubscription.sSubscriptionId
+        );
+      }
+
       subscription = await this.paymentGatewayService_.createSubscription(
         user.sCustomerId,
-        planData.sPlanId
+        planData.sPlanId,
+        trial
       );
 
       const payload = {
@@ -188,20 +211,56 @@ export default class StoreBillingService {
         storeId: currentStore.storeId,
         sSubscriptionId: subscription.id,
       };
-      await this.db_.insert(storeSubscriptionPlan).values(payload);
-    }
+      subscriptionId = subscription.id;
+      const result = await tx
+        .insert(storeSubscriptionPlan)
+        .values(payload)
+        .returning();
+      storeSubscriptionPlanId = result[0].id;
+      // else if (currentSubscription?.sSubscriptionId) {
+      //   subscriptionId = currentSubscription.sSubscriptionId;
+      //   subscription = await this.paymentGatewayService_.getSubscription(
+      //     subscriptionId
+      //   );
+      //   subscription.latest_invoice;
+      // }
 
-    subscriptionId = subscription.id;
-    if (typeof subscription.latest_invoice === "object") {
-      if (typeof subscription.latest_invoice?.payment_intent === "object") {
-        clientSecret =
-          subscription.latest_invoice?.payment_intent?.client_secret;
-      }
-    }
+      // subscriptionId = subscription.id;
+      // if (typeof subscription.latest_invoice === "object") {
+      //   if (typeof subscription.latest_invoice?.payment_intent === "object") {
+      //     clientSecret =
+      //       subscription.latest_invoice?.payment_intent?.client_secret;
+      //   }
+      // }
+      // else if (typeof subscription.pending_setup_intent === "object") {
+      //   clientSecret = subscription.pending_setup_intent?.client_secret;
+      // }
+      return { storeSubscriptionPlanId };
+    });
+  }
 
-    if (typeof subscription.pending_setup_intent === "object") {
-      clientSecret = subscription.pending_setup_intent?.client_secret;
+  async getSubscription(storeSubscriptionPlanId: string) {
+    const data = await this.db_.query.storeSubscriptionPlan.findFirst({
+      where: and(
+        eq(storeSubscriptionPlan.storeId, this.currentStore_.storeId),
+        eq(storeSubscriptionPlan.id, storeSubscriptionPlanId)
+      ),
+    });
+    if (!data) {
+      throw new Error("Subscription Plan not found");
     }
-    return { subscriptionId, clientSecret };
+    if (!data?.sSubscriptionId) {
+      throw new Error("S_Subscription_ID not found");
+    }
+    const subscription = await this.paymentGatewayService_.getSubscription(
+      data?.sSubscriptionId
+    );
+
+    const clientSecret =
+      // @ts-ignore
+      subscription.latest_invoice?.payment_intent?.client_secret ||
+      // @ts-ignore
+      subscription.pending_setup_intent?.client_secret;
+    return { subscriptionId: data.sSubscriptionId, clientSecret };
   }
 }

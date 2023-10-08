@@ -21,14 +21,7 @@ import auth from "./middleware/auth";
 import cookieParser from "cookie-parser";
 import { loggerInstance } from "./utils/logger";
 import { resolve } from "path";
-import {
-  PgJsDatabaseType,
-  plan,
-  store,
-  storeSubscriptionPlan,
-  storeToUser,
-} from "db";
-import { eq, and } from "drizzle-orm";
+import storeHandler from "./middleware/store-handler";
 
 export function registerService(container: AwilixContainer) {
   const corePath = "./services/*.js";
@@ -89,24 +82,21 @@ export function registerRoutes(container: AwilixContainer) {
   });
   app.use(
     "/admin",
+    storeHandler(container),
     loadControllers("./routes/admin-public/*.js", { cwd: __dirname })
   );
   app.use(
     "/admin",
     auth(),
-    async (req, res, next) => {
-      const currentStore = await getCurrentStore(
-        container,
-        req.headers.storeid as string,
-        req.user?.userId
-      );
+    storeHandler(container),
 
-      req.container.register({
-        currentStore: asValue(currentStore),
-      });
-      next();
-    },
     loadControllers("./routes/admin/*.js", { cwd: __dirname })
+  );
+
+  app.use(
+    "/store",
+    storeHandler(container),
+    loadControllers("./routes/storefront/*.js", { cwd: __dirname })
   );
 
   app.use(errorHandlerMiddleware());
@@ -152,38 +142,4 @@ export function registerSeeder(container: AwilixContainer) {
 
     container.build(asFunction((cradle) => new loaded(cradle)).singleton());
   });
-}
-
-async function getCurrentStore(
-  container: AwilixContainer,
-  storeId: string | undefined,
-  userId: string | undefined
-) {
-  const db: PgJsDatabaseType = container.resolve("db");
-  if (!storeId || !userId) {
-    return undefined;
-  }
-  if (storeId && typeof storeId === "string") {
-    const currentStore = await db
-      .select({
-        storeId: store.id,
-        storeUserId: storeToUser.id,
-        plan: plan.key,
-        planStatus: storeSubscriptionPlan.status,
-      })
-      .from(store)
-      .innerJoin(storeToUser, eq(storeToUser.storeId, store.id))
-      .leftJoin(
-        storeSubscriptionPlan,
-        eq(storeToUser.storeId, storeSubscriptionPlan.id)
-      )
-      .leftJoin(plan, eq(storeSubscriptionPlan.planId, plan.id))
-      .where(
-        and(eq(storeToUser.userId, userId), eq(storeToUser.storeId, storeId))
-      );
-
-    if (!currentStore[0]) throw new Error("Store not exist");
-    return currentStore[0];
-  }
-  return undefined;
 }

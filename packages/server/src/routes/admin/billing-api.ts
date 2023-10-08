@@ -58,6 +58,14 @@ export default class BillingApi {
 
     res.json(data);
   }
+
+  @route("/subscribe/:id")
+  @GET()
+  async getStoreSubscriptionPlan(req: Request, res: Response) {
+    const data = await this.storeBillingService_.getSubscription(req.params.id);
+
+    res.json(data);
+  }
 }
 
 const subscribePlanDTO = z.object({

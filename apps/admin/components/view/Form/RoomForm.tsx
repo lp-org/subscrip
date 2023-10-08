@@ -1,6 +1,6 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Room, NewRoom } from "db";
+import { Room } from "db";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import React from "react";
@@ -15,6 +15,8 @@ import { useRequest } from "../../../utils/adminClient";
 import UploadArea from "../../UploadArea";
 import { useParams } from "next/navigation";
 import { InputNumber } from "primereact/inputnumber";
+import { createRoomType, updateRoomType } from "utils-data";
+import { useAdminRouter } from "../../../utils/use-admin-router";
 
 const RoomForm = ({
   payload,
@@ -31,10 +33,12 @@ const RoomForm = ({
     queryClient.invalidateQueries(["getRoom", id]);
     queryClient.invalidateQueries(["roomList"]);
   };
+  const { replace } = useAdminRouter();
   const { mutate } = useMutation({
     mutationFn: adminClient.room.create,
     onSuccess: (res) => {
       showToast({ severity: "success", detail: "Create Room Successfully" });
+      replace(`/rooms/${res.data.id}`);
     },
   });
   const queryClient = useQueryClient();
@@ -96,12 +100,12 @@ const RoomForm = ({
       });
     },
   });
-  const form = useForm<Room>({
+  const form = useForm<createRoomType | updateRoomType>({
     defaultValues: { ...payload },
   });
   const { register, handleSubmit } = form;
 
-  const onSubmit: SubmitHandler<NewRoom> = (data) => {
+  const onSubmit: SubmitHandler<createRoomType | updateRoomType> = (data) => {
     if (payload) {
       mutateUpdate({ id, payload: data });
     } else {
@@ -130,9 +134,7 @@ const RoomForm = ({
                       <label htmlFor={field.name}>Base price</label>
                       <CurrencyInput
                         value={field.value}
-                        onAmountChange={(e) => {
-                          field.onChange(e);
-                        }}
+                        onAmountChange={field.onChange}
                       />
                       {InputError({ name: field.name })}
                     </>
@@ -182,7 +184,6 @@ const RoomForm = ({
                     />
                   )}
                 />
-                {/* <InputNumber {...form.register("quantity")} min={0} /> */}
               </div>
             </Card>
           </div>

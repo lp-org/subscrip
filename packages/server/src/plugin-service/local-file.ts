@@ -50,7 +50,6 @@ export class LocalFileService extends AbstractFileService {
       const filePath = `${process.cwd()}/${fileKey}`;
 
       if (fs.existsSync(filePath)) {
-        console.log(filePath);
         fs.unlinkSync(filePath);
         resolve();
       }

@@ -19,10 +19,23 @@ import {
 
 export const store = pgTable("store", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull().default("My Store"),
+  // name: text("name").notNull().default("My Store"),
   email: text("email"),
-  url: text("url").unique(),
+  plan: text("plan"),
+  planStatus: text("plan_status"),
   active: boolean("active").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const storeSite = pgTable("storeSite", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  url: text("url").unique(),
+  isCustomDomain: boolean("is_custom_domain").default(false),
+  domain: text("domain"),
+  storeId: uuid("store_id")
+    .unique()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -42,7 +55,6 @@ export const plan = pgTable("plan", {
 export const storeSubscriptionPlan = pgTable("store_subscription_plan", {
   id: uuid("id").defaultRandom().primaryKey(),
   storeId: uuid("store_id").references(() => store.id),
-
   planId: uuid("plan_id").references(() => plan.id),
   status: text("status")
     .$type<StripeSubscriptionStatusType>()
@@ -365,7 +377,7 @@ export const galleryRelations = relations(gallery, ({ one, many }) => ({
 
 export const setting = pgTable("setting", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name"),
+  name: text("name").default("My Store"),
   email: text("email"),
   logo: text("logo"),
   favicon: text("favicon"),

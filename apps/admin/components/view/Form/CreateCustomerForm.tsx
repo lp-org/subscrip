@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NewCustomerType } from "db";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import React from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import InputError from "ui/InputError";
 
 import { useRequest } from "../../../utils/adminClient";

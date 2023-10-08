@@ -13,6 +13,10 @@ import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Metadata } from "next/types";
 import { useRequest } from "../../utils/adminClient";
+import { useToast } from "ui";
+import { Chip } from "primereact/chip";
+import { Badge } from "primereact/badge";
+import { Tag } from "primereact/tag";
 
 const StorePage = () => {
   const { adminClient } = useRequest();
@@ -36,13 +40,15 @@ const StorePage = () => {
     );
   return (
     <div className="main-layout">
-      <div className="main-container">
-        {stores.length === 0 || action === "create" ? (
-          <CreateStoreForm />
-        ) : (
-          <SelectStoreForm stores={stores} />
-        )}
-      </div>
+      {stores && (
+        <div className="main-container">
+          {stores?.length === 0 || action === "create" ? (
+            <CreateStoreForm />
+          ) : (
+            <SelectStoreForm stores={stores} />
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -62,14 +68,34 @@ const CreateStoreForm = () => {
   const onSubmit: SubmitHandler<CreateStoreFormProps> = (data) => {
     mutate(data);
   };
+  const { showToast } = useToast();
   const { mutate, isLoading } = useMutation({
     mutationFn: adminClient.store.create,
     onSuccess: (res) => {
-      router.push(`/store/${res.data.id}/dashboard`);
+      showToast({
+        severity: "success",
+        detail: "Store Successfully Created, Redirecting to Dashboard",
+      });
+      setTimeout(() => {
+        router.push(`/store/${res.data.id}/dashboard`);
+      }, 2000);
     },
   });
   return (
-    <Card title="Create store" className="w-full">
+    <Card
+      title={
+        <div className="flex flex-row align-items-center ">
+          <div>Create store</div>
+          <Button
+            onClick={() => router.back()}
+            link
+            label="Back"
+            className="ml-auto"
+          />
+        </div>
+      }
+      className="w-full"
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="field flex flex-column gap-2">
           <label>Store name</label>
@@ -94,21 +120,19 @@ const SelectStoreForm = ({ stores }: { stores: Store[] }) => {
       name: "",
     },
   });
-  const { adminClient } = useRequest();
-  const { mutate, isLoading } = useMutation({
-    mutationFn: adminClient.store.create,
-  });
-  if (isLoading) {
-    return <></>;
-  }
 
   return (
     <Card title="Select store" className="w-full">
       <div className="flex flex-column gap-4">
         {stores?.map((el) => (
           <Link href={`/store/${el.id}/dashboard`} key={el.id}>
-            <div className="border-round border-1 border-gray-500 p-4 w-full hover:bg-gray-300 font-bold cursor-pointer">
-              {el.name}
+            <div className="hover:bg-gray-300 border-round border-1 border-gray-500 p-4 flex flex-row cursor-pointer">
+              <div className=" w-full  font-bold ">{el.name}</div>
+
+              <Tag
+                value={el.active ? "Active" : "Inactive"}
+                className={el.active ? "" : "bg-gray-500"}
+              ></Tag>
             </div>
           </Link>
         ))}

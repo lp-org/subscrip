@@ -1,5 +1,5 @@
 import { useParams } from "next/navigation";
-import { AxiosRequestConfig, axiosClient } from "sdk";
+import { AxiosRequestConfig } from "sdk";
 import AdminApi from "sdk/src/api/admin-api";
 import { useMemo } from "react";
 import requestClient from "./request-client";

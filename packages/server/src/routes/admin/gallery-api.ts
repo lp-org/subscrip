@@ -5,6 +5,7 @@ import multer from "multer";
 import DefaultFileService from "../../services/FileService";
 import GalleryService from "../../services/GalleryService";
 import { deleteFileDTO } from "utils-data";
+import auth from "../../middleware/auth";
 
 const upload = multer({ dest: "uploads/" });
 type InjectedDependencies = {
@@ -24,7 +25,6 @@ export default class UploadAPI {
   @route("/upload")
   @POST()
   @before(upload.array("files"))
-  // @before([auth()])
   async uploadImage(req: Request, res: Response) {
     const files = req.files as any;
     if (!files?.length) {

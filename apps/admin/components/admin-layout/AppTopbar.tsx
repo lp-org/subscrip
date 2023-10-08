@@ -21,6 +21,7 @@ import { useRequest } from "../../utils/adminClient";
 import Image from "next/image";
 import Logo from "../logo/logo";
 import { useAdminRouter } from "../../utils/use-admin-router";
+import { useIsActiveStore } from "../../utils/use-is-active-store";
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
   const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } =
     useContext(LayoutContext);
@@ -34,43 +35,46 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     topbarmenu: topbarmenuRef.current,
     topbarmenubutton: topbarmenubuttonRef.current,
   }));
-  const {
-    data: { data: me },
-  } = useAdminUser();
-
+  const { data } = useAdminUser();
+  const me = data?.data;
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const { adminClient } = useRequest();
   const { mutate } = useMutation({
     mutationFn: adminClient.auth.logout,
     onSuccess: () => {
-      queryClient.invalidateQueries(["me"]);
       showToast({
         severity: "success",
         detail: "Logout",
       });
+      queryClient.clear();
       router.refresh();
     },
   });
   const handleLogout = () => mutate();
   const { push } = useAdminRouter();
+  const isActiveStore = useIsActiveStore();
   return (
     <div className="layout-topbar">
       <div
-        onClick={() => push("/dashboard")}
+        onClick={() => {
+          isActiveStore && push("/dashboard");
+        }}
         className="layout-topbar-logo cursor-pointer"
       >
         <Logo isDark={layoutConfig.colorScheme === "light" ? false : true} />
       </div>
 
-      <button
-        ref={menubuttonRef}
-        type="button"
-        className="p-link layout-menu-button layout-topbar-button"
-        onClick={onMenuToggle}
-      >
-        <i className="pi pi-bars" />
-      </button>
+      {isActiveStore && (
+        <button
+          ref={menubuttonRef}
+          type="button"
+          className="p-link layout-menu-button layout-topbar-button"
+          onClick={onMenuToggle}
+        >
+          <i className="pi pi-bars" />
+        </button>
+      )}
 
       <button
         ref={topbarmenubuttonRef}
@@ -107,7 +111,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             <span>Settings</span>
           </button>
         </Link>
-        {me.store?.name && (
+        {me?.store?.name && (
           <div className="p-link w-3 h-3 flex align-items-center ml-3">
             <Avatar
               label={me.store.name.charAt(0).toUpperCase()}
@@ -118,10 +122,10 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         <Menu
           model={[
             {
-              label: me.store?.name,
+              label: me?.store?.name,
               icon: () => (
                 <Avatar
-                  label={me.store?.name.charAt(0).toUpperCase()}
+                  label={me?.store?.name?.charAt(0).toUpperCase()}
                   onClick={(e) => profileMenu.current.toggle(e)}
                   className="mr-2"
                 />
@@ -129,7 +133,10 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             },
             {
               label: "Switch Store",
-              command: () => router.push("/store"),
+              command: () => {
+                queryClient.clear();
+                router.push("/store");
+              },
             },
             {
               label: "Logout",

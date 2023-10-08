@@ -15,6 +15,13 @@
       "when": 1695370697884,
       "tag": "0001_gigantic_black_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1696161356047,
+      "tag": "0002_loving_fallen_one",
+      "breakpoints": true
     }
   ]
 }

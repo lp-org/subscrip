@@ -2,7 +2,7 @@
 import { Card } from "primereact/card";
 import React, { useEffect, useState } from "react";
 import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRequest } from "../../../../../../utils/adminClient";
 import { formatPrice } from "ui";
@@ -15,22 +15,35 @@ import { capitalize } from "lodash";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Divider } from "primereact/divider";
 import { Skeleton } from "primereact/skeleton";
+import { Panel } from "primereact/panel";
+import { useIsActiveStore } from "../../../../../../utils/use-is-active-store";
+import { useRouter, useSearchParams } from "next/navigation";
+import PaymentForm from "../../../../../../components/CheckoutForm/PaymentForm";
+
 dayjs.extend(relativeTime);
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-);
+
+interface PlanPrice {
+  price: number;
+
+  currency: string;
+}
+
 const SettingsBillings = () => {
   const { adminClient } = useRequest();
+  const isActiveStore = useIsActiveStore();
 
   const { data: mySubscriptionData } = useQuery({
     queryFn: () =>
-      adminClient.billing.mySubscription({ status: "active,trialing" }),
+      adminClient.billing.mySubscription({
+        status: "active,trialing,past_due",
+      }),
     queryKey: ["mySubscriptionPlan"],
   });
 
   const myActiveSubscription = mySubscriptionData?.data;
+
   const { data: paymentMethodData } = useQuery({
     queryFn: () =>
       adminClient.billing.getPaymentMethod(
@@ -40,77 +53,100 @@ const SettingsBillings = () => {
     enabled: myActiveSubscription?.[0]?.sPaymentMethodId ? true : false,
   });
   const paymentMethod = paymentMethodData?.data;
-  const [planId, setPlanId] = useState<string>();
+
+  const [planPrice, setPlanPrice] = useState<PlanPrice>();
+  const router = useRouter();
   return (
     <Card title="Billings">
-      {myActiveSubscription?.length ? (
-        myActiveSubscription.map((el) => (
-          <Card
-            className="mb-4"
-            title={
-              <div className="flex flex-row">
-                <div>{el?.plan?.name}</div>
-                <div className="ml-auto">
-                  {!el.sPaymentMethodId ? (
-                    <Button
-                      className="w-full"
-                      onClick={() => setPlanId(el.planId)}
-                    >
-                      Update Payment Method
-                    </Button>
-                  ) : (
-                    <Button icon="pi pi-ellipsis-v" link></Button>
-                  )}
+      {myActiveSubscription?.map((el) => (
+        <Panel
+          className="mb-4 w-full"
+          pt={{
+            title: {
+              className: "w-full",
+            },
+          }}
+          header={
+            <div className="flex flex-row">
+              <div className="flex flex-column">
+                <div className="flex flex-row">
+                  <div>{el?.plan?.name}</div>
+                  <Badge
+                    value={
+                      el.status === "trialing"
+                        ? "Trial"
+                        : capitalize(el.status).replace("_", " ")
+                    }
+                    severity={
+                      el.status === "past_due"
+                        ? "danger"
+                        : el.status === "trialing"
+                        ? "info"
+                        : "success"
+                    }
+                    className="ml-2"
+                  ></Badge>
                 </div>
+                {planPrice && (
+                  <div className="text-gray-500">
+                    {formatPrice(planPrice.price, planPrice.currency)} / month
+                  </div>
+                )}
               </div>
-            }
-            subTitle={
-              <Badge
-                value={
-                  el.status === "trialing" ? "Trial" : capitalize(el.status)
-                }
-                className="px-2"
-              ></Badge>
-            }
-            key={el.id}
-          >
-            <p className="text-xl">
-              Next Billing Date:{" "}
-              <span className="font-bold">
-                {dayjs(el.nextBillingDate).format("DD MMM YYYY")}
-              </span>
-            </p>
-            {el.status === "trialing" && (
-              <p className="text-gray-500 font-bold">
-                {el.sPaymentMethodId
-                  ? `Your trial period will be ended on ${dayjs(
-                      el.nextBillingDate
-                    ).format(
-                      "DD MMM YYYY"
-                    )} and charge automatically on the day`
-                  : `Your trial plan will be ended on ${dayjs(
-                      el.nextBillingDate
-                    ).format("DD MMM YYYY")}`}
-              </p>
-            )}
-            {paymentMethod?.card && (
-              <p className="text-xl">
-                Bill with:{" "}
-                <span className="font-bold">{paymentMethod?.card.last4}</span>
-              </p>
-            )}
 
-            {planId && (
-              <>
-                <Divider type="solid" />{" "}
-                <PaymentForm planId={planId} isSetup={true} />
-              </>
-            )}
-          </Card>
-        ))
-      ) : (
-        <SelectPlan />
-      )}
+              <div className="ml-auto">
+                {el.status === "past_due" || !el.sPaymentMethodId ? (
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      router.replace(`?sspid=${el.id}&status=${el.status}`);
+                      setPlanPrice({
+                        price: el.price,
+                        currency: el.currency,
+                      });
+                    }}
+                  >
+                    Update Payment Method
+                  </Button>
+                ) : (
+                  <Button icon="pi pi-ellipsis-v" link></Button>
+                )}
+              </div>
+            </div>
+          }
+          key={el.id}
+        >
+          <p className="text-xl">
+            Next Billing Date:{" "}
+            <span className="font-bold">
+              {dayjs(el.nextBillingDate).format("DD MMM YYYY")}
+            </span>
+          </p>
+          {el.status === "trialing" && (
+            <p className="text-gray-500 font-bold">
+              {el.sPaymentMethodId
+                ? `Your trial period will be ended on ${dayjs(
+                    el.nextBillingDate
+                  ).format(
+                    "DD MMM YYYY"
+                  )}, and will be automatically billed on that day.`
+                : `Your trial plan will be ended on ${dayjs(
+                    el.nextBillingDate
+                  ).format("DD MMM YYYY")}`}
+            </p>
+          )}
+          {paymentMethod?.card && (
+            <p className="text-xl">
+              Bill with:{" "}
+              <span className="font-bold">{paymentMethod?.card.last4}</span>
+            </p>
+          )}
+
+          <>
+            <Divider type="solid" /> <PaymentForm />
+          </>
+        </Panel>
+      ))}
     </Card>
   );
 };
@@ -165,48 +201,11 @@ const SelectPlan = () => {
               " /" +
               selectedPlan.interval
             }
-          />{" "}
-          <PaymentForm planId={selectedPlan.id} />
+          />
+          <PaymentForm />
         </>
       )}
     </>
-  );
-};
-
-const PaymentForm = ({
-  planId,
-  isSetup,
-}: {
-  planId: string;
-  isSetup?: boolean;
-}) => {
-  const { adminClient } = useRequest();
-  const { mutate, isLoading } = useMutation({
-    mutationFn: adminClient.billing.subscribe,
-    onSuccess: (res) => {
-      setClientSecret(res.data.clientSecret);
-      setSubscriptionId(res.data.subscriptionId);
-    },
-  });
-  const [clientSecret, setClientSecret] = useState<string>();
-  const [subscriptionId, setSubscriptionId] = useState<string>();
-  useEffect(() => {
-    if (planId) mutate(planId);
-  }, [mutate, planId]);
-  if (isLoading)
-    return (
-      <>
-        <Skeleton className="mb-2"></Skeleton>
-        <Skeleton width="10rem" className="mb-2"></Skeleton>
-        <Skeleton width="5rem" className="mb-2"></Skeleton>
-        <Skeleton height="2rem" className="mb-2"></Skeleton>
-        <Skeleton width="10rem" height="4rem"></Skeleton>
-      </>
-    );
-  return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <CheckoutForm subscriptionId={subscriptionId} isSetup={isSetup} />
-    </Elements>
   );
 };
 

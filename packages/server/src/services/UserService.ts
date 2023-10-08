@@ -51,25 +51,24 @@ class UserService extends Model<typeof user> {
           email: user.email,
           createdAt: user.createdAt,
           sCustomerId: user.sCustomerId,
-          store: {
-            ...(currentStore ? { storeUserId: storeToUser.id } : {}),
-            ...(currentStore ? { id: storeToUser.storeId } : {}),
-            ...(currentStore ? { name: store.name } : {}),
-            ...(currentStore ? { currency: setting.currency } : {}),
-          },
+          // store: {
+          //   ...(currentStore ? { storeUserId: storeToUser.id } : {}),
+          //   ...(currentStore ? { id: storeToUser.storeId } : {}),
+          //   ...(currentStore ? { name: store.name } : {}),
+          //   ...(currentStore ? { currency: setting.currency } : {}),
+          // },
         })
         .from(user)
-        .leftJoin(storeToUser, eq(storeToUser.userId, user.id))
-        .leftJoin(store, eq(storeToUser.storeId, store.id))
-        .leftJoin(setting, eq(setting.storeId, store.id))
-        .where(
-          and(
-            eq(user.id, userId),
-            currentStore && eq(storeToUser.storeId, currentStore.storeId)
-          )
-        );
+        // .leftJoin(storeToUser, eq(storeToUser.userId, user.id))
+        // .leftJoin(store, eq(storeToUser.storeId, store.id))
+        // .leftJoin(setting, eq(setting.storeId, store.id))
 
-      return data[0];
+        .where(and(eq(user.id, userId)));
+      if (!data[0]) {
+        return undefined;
+      }
+      const result = { ...data[0], store: currentStore };
+      return result;
     });
   }
 

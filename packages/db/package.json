@@ -8,6 +8,7 @@
         "build": "tsc --build"
     },
     "dependencies": {
+        "awilix": "^8.0.1",
         "drizzle-kit": "^0.19.12",
         "drizzle-orm": "^0.28.5",
         "drizzle-typebox": "^0.1.0",

@@ -3,9 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.axiosClient = void 0;
+exports.axiosClient = exports.client = void 0;
 var axios_1 = __importDefault(require("axios"));
-var client = axios_1["default"].create({
+exports.client = axios_1["default"].create({
     // eslint-disable-next-line turbo/no-undeclared-env-vars
     baseURL: process.env.BACKEND_URL || "http://localhost:5000"
 });
@@ -22,6 +22,6 @@ function clientRequest(method, path, payload) {
         url: path,
         data: payload
     };
-    return client(options);
+    return (0, exports.client)(options);
 }
 exports["default"] = clientRequest;

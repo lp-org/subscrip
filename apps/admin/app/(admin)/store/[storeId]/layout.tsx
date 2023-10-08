@@ -25,7 +25,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.data, isLoading, router.push]);
 
-  if (!data.data?.store?.id && !isLoading) {
+  if (!data.data?.store?.storeId && !isLoading) {
     return <Error statusCode={404} title="Store not found" />;
   }
   if (data && !isLoading) {

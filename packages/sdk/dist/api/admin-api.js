@@ -96,6 +96,9 @@ var AdminApi = function (request) {
             },
             subscribe: function (planId) {
                 return request("POST", "admin/billing/subscribe", { planId: planId });
+            },
+            getStoreSubscriptionPlan: function (storeSubscriptionPlanid) {
+                return request("GET", "admin/billing/subscribe/".concat(storeSubscriptionPlanid));
             }
         },
         booking: {

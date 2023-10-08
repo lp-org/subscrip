@@ -2,11 +2,10 @@ import { GET, POST, before, route } from "awilix-express";
 import { PgJsDatabaseType } from "db";
 
 import EventBusService from "../../services/EventBusService";
-import UserService from "../../services/UserService";
+
 import jwt from "jsonwebtoken";
 import AuthService from "../../services/AuthService";
 import { Request, Response } from "express";
-import auth from "../../middleware/auth";
 
 type InjectedDependencies = {
   db: PgJsDatabaseType;

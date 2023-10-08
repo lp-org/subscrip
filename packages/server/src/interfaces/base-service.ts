@@ -3,6 +3,7 @@ import { Column, SQL, Table, and, eq, getTableName, sql } from "drizzle-orm";
 import { PgTableFn } from "drizzle-orm/pg-core";
 import { whereEqQuery } from "../utils/build-query";
 import { CurrentStore } from "../types";
+import { PageConfig } from "utils-data";
 type InjectedDependencies = {
   db: PgJsDatabaseType;
   currentStore: CurrentStore;
@@ -20,7 +21,8 @@ export abstract class BaseService {
   async listByStore<T extends Table>(
     filter: Record<string, unknown>,
     table: T,
-    withRelation?: Record<string, unknown>
+    withRelation?: Record<string, unknown>,
+    pageConfig?: PageConfig
   ) {
     const tableName = getTableName(table);
     const currentStore = this.currentStore_;
@@ -33,7 +35,8 @@ export abstract class BaseService {
         with: {
           [tableName]: {
             where,
-            limit: 10,
+            limit: pageConfig?.limit,
+            offset: pageConfig?.offset,
             with: withRelation,
           },
         },

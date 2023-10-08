@@ -4,7 +4,7 @@ export { connectDatabase } from "./connect";
 
 export * from "./schema";
 export * from "./types";
-
+export * from "./store";
 export type PgJsDatabaseType = PostgresJsDatabase<typeof schema>;
 
 export type SchemaType = typeof schema;

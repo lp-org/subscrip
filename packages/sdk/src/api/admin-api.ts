@@ -1,6 +1,12 @@
-import { NewCustomerType, NewRoom, Store, User } from "db";
+// @ts-nocheck
+import {
+  BookingPaymentStatusType,
+  Store,
+  StripeSubscriptionStatusType,
+  User,
+} from "db";
 import clientRequest from "../client";
-import { AxiosResponse } from "axios";
+import { AxiosResponse, Method } from "axios";
 import UserService from "server/src/services/UserService";
 import StoreService, {
   updateStoreSettingDTOType,
@@ -19,6 +25,8 @@ import {
   updateRoomImageType,
   disabledBookingDateType,
   bookingCalendarType,
+  createCustomerType,
+  createRoomType,
 } from "utils-data";
 
 const AdminApi = (request: typeof clientRequest) => {
@@ -94,7 +102,7 @@ const AdminApi = (request: typeof clientRequest) => {
     },
     room: {
       create(
-        payload: NewRoom
+        payload: createRoomType
       ): Promise<AxiosResponse<Awaited<ReturnType<RoomService["create"]>>>> {
         return request("POST", "admin/rooms", payload);
       },
@@ -193,6 +201,19 @@ const AdminApi = (request: typeof clientRequest) => {
       > {
         return request("POST", "admin/billing/subscribe", { planId });
       },
+
+      getStoreSubscriptionPlan(
+        storeSubscriptionPlanid: string
+      ): Promise<
+        AxiosResponse<
+          Awaited<ReturnType<StoreBillingService["getSubscription"]>>
+        >
+      > {
+        return request(
+          "GET",
+          `admin/billing/subscribe/${storeSubscriptionPlanid}`
+        );
+      },
     },
     booking: {
       list(
@@ -241,7 +262,7 @@ const AdminApi = (request: typeof clientRequest) => {
       },
 
       create(
-        payload: NewCustomerType
+        payload: createCustomerType
       ): Promise<
         AxiosResponse<Awaited<ReturnType<CustomerService["create"]>>>
       > {

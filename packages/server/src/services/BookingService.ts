@@ -55,6 +55,7 @@ export default class BookingService extends BaseService {
       if (!valid) {
         throw new Error("Check in date & checkout-out date is not valid");
       }
+
       return await tx.insert(booking).values({
         checkInDate: validated.checkInDate,
         checkOutDate: validated.checkOutDate,

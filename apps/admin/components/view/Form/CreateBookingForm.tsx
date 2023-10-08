@@ -102,7 +102,7 @@ const CreateBookingForm = () => {
   const onSubmit: SubmitHandler<BookingCreateType[0]> = (data) => {
     mutateBooking(data);
   };
-  console.log(form.formState.errors);
+
   const formData = useWatch({ control: form.control });
   const days = useMemo(() => {
     if (formData.checkOutDate && formData.checkInDate)
@@ -221,7 +221,7 @@ const CreateBookingForm = () => {
                         <CurrencyInput
                           currency="USD"
                           mode="currency"
-                          handleamountchange={(e) => field.onChange(e)}
+                          onAmountChange={(e) => field.onChange(e)}
                           value={field.value}
                           disabled={!isCustomPrice}
                         />

@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, Method } from "axios";
 
-const client = axios.create({
+export const client = axios.create({
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   baseURL: process.env.BACKEND_URL || "http://localhost:5000",
 });

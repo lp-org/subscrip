@@ -1,0 +1,32 @@
+body {
+    font-family: var(--font-family);
+    margin: 0
+}         
+:root {
+    --store-area-width: 34rem;
+    --store-area-height: 51rem;
+    @media (min-width: 668px){  
+        --store-area-height: calc(100vh - 5rem);
+    }   
+}
+
+
+
+.main-container {
+    max-width: var(--store-area-width);
+    min-height: var(--store-area-height);
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.main-layout {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+    width: 100%;
+}

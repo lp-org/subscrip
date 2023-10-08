@@ -1,5 +1,6 @@
 import {
   AnyColumn,
+  Column,
   SQL,
   Table,
   TableConfig,
@@ -7,8 +8,10 @@ import {
   asc,
   desc,
   eq,
+  getTableColumns,
   ilike,
   inArray,
+  is,
 } from "drizzle-orm";
 import { AnyPgTable, PgTableFn, PgTableWithColumns } from "drizzle-orm/pg-core";
 import { FilterType } from "../types";
@@ -85,6 +88,7 @@ export function whereEqQuery(
     for (const [key, value] of Object.entries(filter)) {
       if (typeof value === "string" && value.includes(",")) {
         const inValue = value.split(",");
+
         where.push(inArray(table_[key], inValue));
       } else if (key === "q") {
         if (typeof value === "object") {
