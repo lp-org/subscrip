@@ -18,35 +18,7 @@ async function getData(params: any) {
 
 const FrontStoreLayout = async ({ children, params }) => {
   const data = await getData(params);
-  // const data = {
-  //   id: 1,
-  //   name: "a",
-  //   email: "mmmz",
-  //   logo: null,
-  //   favicon: null,
-  //   ogimage: null,
-  //   phone: "012312312",
-  //   address: "12, Old Town, East Side of Koh Lanta. Krabi Province, Thailand",
-  //   facebook: "https://facebook.com/facebook",
-  //   instagram: "https://facebook.com/facebook",
-  //   currency: null,
-  //   slider: [
-  //     {
-  //       url: "jhgkgk",
-  //       image: "/uploads/borabora2.jpg-pQUTA.jpeg",
-  //       is_active: true,
-  //       open_new: true,
-  //     },
-  //     {
-  //       url: "",
-  //       image: "/uploads/borabora1.jpg-BwCoU.jpeg",
-  //       is_active: true,
-  //       open_new: true,
-  //     },
-  //   ],
-  //   createdAt: "2023-06-12T16:45:26.709Z",
-  //   updatedAt: "2023-06-12T16:45:26.709Z",
-  // };
+
   return (
     <div className="h-screen font-serif">
       <div className="flex h-full flex-col">
@@ -66,7 +38,7 @@ const FrontStoreLayout = async ({ children, params }) => {
 export async function generateMetadata({ params }): Promise<Metadata> {
   const store = await getData(params);
   return {
-    title: { template: `%s | ${params.site}`, default: store?.name },
+    title: { template: `%s | ${store.name}`, default: store?.name },
     description: `Description`,
     openGraph: {
       images: store.ogimage || "/",

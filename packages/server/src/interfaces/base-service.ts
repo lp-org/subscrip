@@ -62,7 +62,7 @@ export abstract class BaseService {
     return count.count;
   }
 
-  async whereEqQueryByStore(
+  whereEqQueryByStore(
     filter: Record<string, unknown> | undefined,
     table_: ReturnType<PgTableFn>
   ) {

@@ -89,7 +89,7 @@ const Site = () => {
                         value={field.value}
                       />
                       <span className="p-inputgroup-addon">
-                        .subscrip.store
+                        {process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN}
                       </span>
                     </div>
                   )}
@@ -105,7 +105,9 @@ const Site = () => {
                 <label>URL</label>
                 <div className="font-bold">
                   {storeSetting?.url}
-                  <span className="text-base font-normal">.subscrip.store</span>
+                  <span className="text-base font-normal">
+                    {process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN}
+                  </span>
                 </div>
               </div>
             </div>

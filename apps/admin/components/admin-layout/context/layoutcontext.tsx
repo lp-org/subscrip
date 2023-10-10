@@ -13,7 +13,7 @@ export const LayoutContext = createContext({} as LayoutContextProps);
 
 export const LayoutProvider = ({ children }: ChildContainerProps) => {
   const isActiveStore = useIsActiveStore();
-  console.log(isActiveStore);
+
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
     ripple: false,
     inputStyle: "outlined",

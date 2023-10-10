@@ -206,7 +206,7 @@ export default class EventBusService {
         );
       });
 
-      await sleep(5000);
+      await sleep(10000);
     }
   }
 }

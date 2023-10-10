@@ -6,7 +6,7 @@ export function connectDatabase(
     "postgresql://postgres:12345678@localhost:5432/app"
 ) {
   const client = postgres(connectionString);
-  const db = drizzle(client, { schema });
+  const db = drizzle(client, { schema, logger: true });
 
   return db;
 }

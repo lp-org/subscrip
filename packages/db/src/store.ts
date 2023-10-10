@@ -14,7 +14,7 @@ export async function getCurrentStore(
   container: AwilixContainer,
   storeId: string,
   userId: string,
-  url?: string
+  storeFrontStoreId?: string
 ) {
   const db: PgJsDatabaseType = container.resolve("db");
   const condition: SQL[] = [];
@@ -24,8 +24,8 @@ export async function getCurrentStore(
       eq(storeToUser.userId, userId),
       eq(storeToUser.storeId, storeId)
     );
-  } else if (url) {
-    condition.push(eq(storeSite.url, url));
+  } else if (storeFrontStoreId) {
+    condition.push(eq(store.id, storeFrontStoreId));
   } else {
     return undefined;
   }
@@ -39,6 +39,7 @@ export async function getCurrentStore(
         currency: setting.currency,
         planStatus: store.planStatus,
         plan: store.plan,
+        url: storeSite.url,
       })
       .from(store)
       .innerJoin(storeToUser, eq(storeToUser.storeId, store.id))
@@ -46,11 +47,13 @@ export async function getCurrentStore(
       //   storeSubscriptionPlan,
       //   eq(storeToUser.storeId, storeSubscriptionPlan.storeId)
       // )
-      // .leftJoin(plan, eq(storeSubscriptionPlan.planId, plan.id))
+      .leftJoin(storeSite, eq(storeSite.storeId, store.id))
       .leftJoin(setting, eq(setting.storeId, store.id))
       .where(and(...condition));
-
-    return currentStore[0];
+    const result = currentStore[0];
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    result.url = `${protocol}://${result.url}${process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN}`;
+    return result;
   } catch (error) {
     return undefined;
   }

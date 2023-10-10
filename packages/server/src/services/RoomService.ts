@@ -1,13 +1,25 @@
-import { PgJsDatabaseType, room, roomImages, roomSchema, store } from "db";
+import {
+  Gallery,
+  PgJsDatabaseType,
+  Room,
+  gallery,
+  room,
+  roomImages,
+  roomSchema,
+  store,
+} from "db";
 import { RESOLVER } from "awilix";
 import {
   InferModel,
+  SQL,
   and,
   asc,
   desc,
   eq,
+  getTableColumns,
   getTableName,
   inArray,
+  sql,
 } from "drizzle-orm";
 import { CurrentStore } from "../types";
 import { BaseService } from "../interfaces/base-service";
@@ -21,6 +33,7 @@ import {
   updateRoomType,
   upsertRoomImageDTO,
 } from "utils-data";
+import { jsonAgg } from "../utils/build-query";
 
 type InjectedDependencies = {
   db: PgJsDatabaseType;
@@ -43,28 +56,15 @@ export default class RoomService extends BaseService {
     this.galleryService_ = galleryService;
   }
 
-  async list(filter: any, pageConfig?: PageConfig) {
-    // const currentStore = this.currentStore_;
-    // return await this.db_.transaction(async (tx) => {
-    //   const result = await tx.query.store.findMany({
-    //     columns: {},
-    //     with: {
-    //       room: {
-    //         limit: 10,
-    //       },
-    //     },
-    //     where: eq(store.id, currentStore.storeId),
-    //   });
-    //   return result[0];
-    // });
-
-    // return await this.db_.query.room.findMany({
+  async list(
+    filter: SQL<unknown>[],
+    pageConfig?: PageConfig
+  ): Promise<{ room: Room[]; count: number }> {
+    // const query = this.db_.query.room.findMany({
     //   with: {
     //     images: {
     //       with: {
-    //         gallery: {
-    //           columns: { fileKey: true, id: true },
-    //         },
+    //         gallery: true,
     //       },
     //       columns: {
     //         roomId: false,
@@ -74,32 +74,52 @@ export default class RoomService extends BaseService {
     //       orderBy: asc(roomImages.position),
     //     },
     //   },
+    //   where: and(...filter, eq(room.storeId, this.currentStore_.storeId)),
+    //   offset: pageConfig?.offset,
+    //   limit: pageConfig?.limit,
+    //   orderBy: desc(room.createdAt),
     // });
 
-    return await this.listByStore(
-      filter,
-      room,
-      {
-        pricings: true,
-        images: {
-          with: {
-            gallery: true,
-          },
-          columns: {
-            roomId: false,
-            galleryId: false,
-          },
+    const roomColumns = getTableColumns(room);
+    let query = this.db_
+      .select({
+        ...roomColumns,
+        images: jsonAgg(gallery, sql`ORDER BY ${roomImages.position}`),
+      })
+      .from(room)
+      .leftJoin(roomImages, eq(roomImages.roomId, room.id))
+      .leftJoin(gallery, eq(roomImages.galleryId, gallery.id))
+      .groupBy(room.id)
+      .where(and(...filter, eq(room.storeId, this.currentStore_.storeId)))
 
-          orderBy: asc(roomImages.position),
-        },
-      },
-      pageConfig
+      .orderBy(desc(room.createdAt));
+
+    if (pageConfig?.offset !== undefined && pageConfig?.limit !== undefined) {
+      query = query.offset(pageConfig?.offset).limit(pageConfig?.limit);
+    }
+    const data = await query;
+
+    const count = await this.listCountByStore(
+      and(...filter, eq(room.storeId, this.currentStore_.storeId)),
+      room
     );
+    // const data = await this.listByStore(
+    //   filter,
+    //   room,
+
+    //   pageConfig
+    // );
+    // const result = { ...data, room: data.room.map((el) => ({ ...el })) };
+    return {
+      room: data,
+      count,
+    };
   }
 
   async create(payload: createRoomType) {
     const currentStore = this.currentStore_;
     const validated = createRoomDTO.parse(payload);
+
     return await this.db_.transaction(async (tx) => {
       const roomData = await tx
         .insert(room)
@@ -126,7 +146,10 @@ export default class RoomService extends BaseService {
   }
 
   async get(id: string) {
-    const currentStore = this.currentStore_;
+    return this.get_({ id });
+  }
+
+  async get_(query: any) {
     const data = await this.db_.query.room.findFirst({
       with: {
         images: {
@@ -136,7 +159,7 @@ export default class RoomService extends BaseService {
           orderBy: asc(roomImages.position),
         },
       },
-      where: and(eq(room.id, id), eq(room.storeId, currentStore.storeId)),
+      where: and(...this.whereEqQueryByStore(query, room)),
     });
     const result = data && {
       ...data,

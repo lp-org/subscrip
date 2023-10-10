@@ -18,6 +18,7 @@ import StoreBillingService from "server/src/services/StoreBillingService";
 import BookingService from "server/src/services/BookingService";
 import CustomerService from "server/src/services/CustomerService";
 import GalleryService from "server/src/services/GalleryService";
+import PaymentMethodService from "server/src/services/PaymentMethodService";
 import { createBookingDTOType } from "server";
 import {
   deleteFileType,
@@ -27,8 +28,10 @@ import {
   bookingCalendarType,
   createCustomerType,
   createRoomType,
+  stripeConnectAccountType,
 } from "utils-data";
-
+// @ts-ignore
+type AxiosReturn<T> = Promise<AxiosResponse<Awaited<ReturnType<T>>>>;
 const AdminApi = (request: typeof clientRequest) => {
   return {
     user: {
@@ -267,6 +270,31 @@ const AdminApi = (request: typeof clientRequest) => {
         AxiosResponse<Awaited<ReturnType<CustomerService["create"]>>>
       > {
         return request("POST", "admin/customer", payload);
+      },
+    },
+
+    paymentMethod: {
+      list(): AxiosReturn<PaymentMethodService["list"]> {
+        return request("GET", "admin/payment-method");
+      },
+      getStorePaymentMethod(
+        paymentMethodId: string
+      ): AxiosReturn<PaymentMethodService["getStorePaymentMethod"]> {
+        return request("GET", `admin/payment-method/${paymentMethodId}`);
+      },
+      getStorePaymentMethod(
+        id: string
+      ): AxiosReturn<PaymentMethodService["getStorePaymentMethod"]> {
+        return request("GET", `admin/payment-method/${id}`);
+      },
+      stripeConnectAccount(
+        payload: stripeConnectAccountType
+      ): AxiosReturn<PaymentMethodService["getStripeConnectLink"]> {
+        return request(
+          "POST",
+          "admin/payment-method/stripe-connect-account",
+          payload
+        );
       },
     },
   };

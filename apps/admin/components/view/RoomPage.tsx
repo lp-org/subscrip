@@ -4,11 +4,10 @@ import { useRequest } from "../../utils/adminClient";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Column } from "primereact/column";
 
 import { Toolbar } from "primereact/toolbar";
 import { useAdminRouter } from "../../utils/use-admin-router";
-import { DataTable } from "ui";
+import { Column, DataTable } from "ui";
 import { Image } from "primereact/image";
 import { revalidateStorePath } from "../../utils/revalidateStore";
 
@@ -17,46 +16,51 @@ import { Chip } from "primereact/chip";
 import { usePageConfig } from "../../utils/use-page-config";
 import { DataTablePageEvent } from "primereact/datatable";
 import { useRouter } from "next/navigation";
+import { useAdminPersistStore } from "../../store/use-admin-persist-store";
+import { Dropdown } from "primereact/dropdown";
+import { Tag } from "primereact/tag";
+import { InputNumber } from "primereact/inputnumber";
 
 const RoomPage = () => {
   const { adminClient } = useRequest();
+  const [statuses] = useState(["published", "draft"]);
   const [pageConfig, setPageConfig] = useState<DataTablePageEvent>({
     first: 0,
     rows: 10,
     page: 0,
     pageCount: 1,
   });
-  // const [pageConfig, setPageConfig] = usePageConfig();
-  const router = useRouter();
-  // console.log(pageConfig);
-  const [p] = usePageConfig();
 
+  const [p] = usePageConfig();
+  const filter = useAdminPersistStore((state) => state.tableFilter.booking);
+
+  const setFilter = useAdminPersistStore((state) => state.setTableFilter);
   const pageOptions = useMemo(() => {
-    const page = p?.page;
-    const offset = page * p?.rows;
-    const limit = p?.rows || 10;
+    const page = filter?.page || 0;
+    const offset = page * (filter?.rows || 10);
+    const limit = filter?.rows || 10;
     return { offset, limit };
-  }, [p]);
+  }, [filter]);
 
   const { data, refetch } = useQuery({
     queryFn: () => {
-      return adminClient.room.list(pageOptions);
+      return adminClient.room.list({ pageOptions, ...filter });
     },
-    queryKey: ["roomList", pageOptions],
+    queryKey: ["roomList", { ...pageOptions, filter }],
   });
   const [selectedRooms, setSelectedRooms] = useState([]);
   const rooms = data?.data.room;
 
   const { push } = useAdminRouter();
-  const leftToolbarTemplate = () => {
+  const tableHeader = () => {
     return (
       <React.Fragment>
-        <div className="my-2">
+        <div className="flex">
           <Button
             label="New"
             icon="pi pi-plus"
             severity="success"
-            className=" mr-2"
+            className="ml-auto"
             onClick={() => push("/rooms/add")}
           />
         </div>
@@ -67,13 +71,14 @@ const RoomPage = () => {
   useEffect(() => {
     refetch();
   }, [pageConfig]);
+
   const roomNameBodyTemplate = (rowData) => {
     return (
       <div className="flex align-items-center gap-2">
         {!!rowData.images.length && (
           <Image
             alt={"room image"}
-            src={rowData.images[0]?.gallery?.url}
+            src={rowData.images[0]?.url}
             width="32"
             height="28"
             imageClassName="border-round"
@@ -85,33 +90,25 @@ const RoomPage = () => {
   };
   return (
     <Card title="Rooms" className="w-full">
-      <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
       <DataTable
+        header={tableHeader}
         paginator
-        rowsPerPageOptions={[2, 10, 25, 50]}
-        rows={p.rows}
+        rows={filter?.rows || 10}
         value={rooms}
         tableStyle={{ minWidth: "50rem" }}
         selectionMode="checkbox"
         selection={selectedRooms}
         totalRecords={data?.data.count}
         // onPage={setPageConfig}
+
         onPage={(e) => {
-          const { first, rows, page, pageCount, filters } = e;
-          router.replace(
-            `?${new URLSearchParams({
-              ...e,
-            })}`
-          );
+          setFilter("booking", e);
         }}
-        first={p.first}
-        onFilter={(e) =>
-          router.replace(
-            `?${new URLSearchParams({
-              ...e,
-            })}`
-          )
-        }
+        filters={filter?.filters}
+        first={filter?.first || 0}
+        onFilter={(e) => {
+          setFilter("booking", e);
+        }}
         lazy
         onSelectionChange={(e) => {
           setSelectedRooms(e.value);
@@ -124,6 +121,7 @@ const RoomPage = () => {
         rowHover
       >
         <Column
+          field=""
           selectionMode="multiple"
           headerStyle={{ width: "3rem" }}
         ></Column>
@@ -135,24 +133,35 @@ const RoomPage = () => {
           filter
         ></Column>
         <Column
-          field="published"
-          header="Published"
+          field="status"
+          header="Status"
           filter
-          body={(rowData) => (
-            <>
-              {rowData.published ? (
-                <>
-                  <Chip label="Active" />
-                </>
-              ) : (
-                <>
-                  <Chip label="Draft" />
-                </>
-              )}
-            </>
+          filterElement={(options) => (
+            <Dropdown
+              value={options.value}
+              options={statuses}
+              onChange={(e) => {
+                options.filterCallback(e.value, options.index);
+              }}
+              placeholder="Select One"
+              className="p-column-filter"
+              showClear
+            />
+          )}
+          body={(rowData) => <Chip label={rowData.status} />}
+        ></Column>
+        <Column
+          field="quantity"
+          header="Quantity"
+          dataType="numeric"
+          filter
+          filterElement={(options) => (
+            <InputNumber
+              value={options.value}
+              onChange={(e) => options.filterCallback(e.value, options.index)}
+            />
           )}
         ></Column>
-        <Column field="quantity" header="Quantity"></Column>
       </DataTable>
     </Card>
   );

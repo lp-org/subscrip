@@ -8,4 +8,18 @@ module.exports = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        port: "5000",
+        hostname: "localhost",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
 };

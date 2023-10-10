@@ -59,6 +59,6 @@ export type Customer = typeof customer.$inferSelect;
 
 export type Gallery = typeof gallery.$inferSelect;
 
-export type Room = {
+export type Room = typeof room.$inferSelect & {
   images: Gallery[];
-} & typeof room.$inferSelect;
+};

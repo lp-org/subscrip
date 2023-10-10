@@ -3,12 +3,17 @@ import { InputNumber, InputNumberProps } from "primereact/inputnumber";
 
 interface CurrencyInputProps extends InputNumberProps {
   onAmountChange: (e: number) => void;
+  currency: string;
 }
-const CurrencyInput = ({ onAmountChange, ...rest }: CurrencyInputProps) => {
+const CurrencyInput = ({
+  onAmountChange,
+  currency,
+  ...rest
+}: CurrencyInputProps) => {
   return (
     <InputNumber
       {...rest}
-      currency="USD"
+      currency={currency}
       mode="currency"
       {...{
         value: rest.value ? rest.value / 100 : 0,

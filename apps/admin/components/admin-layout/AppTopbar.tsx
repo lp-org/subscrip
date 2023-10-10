@@ -22,6 +22,7 @@ import Image from "next/image";
 import Logo from "../logo/logo";
 import { useAdminRouter } from "../../utils/use-admin-router";
 import { useIsActiveStore } from "../../utils/use-is-active-store";
+import { EyeIcon } from "lucide-react";
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
   const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } =
     useContext(LayoutContext);
@@ -122,13 +123,25 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         <Menu
           model={[
             {
-              label: me?.store?.name,
+              label: (
+                <div className="flex flex-row align-items-center gap-4">
+                  <div className="overflow-hidden text-overflow-ellipsis white-space-nowrap w-4rem">
+                    {me?.store?.name}
+                  </div>
+                  <EyeIcon
+                    className="text-gray-500 hover:text-gray-900"
+                    onClick={() => window.open(me?.store?.url, "_blank")}
+                  />
+                </div>
+              ),
               icon: () => (
-                <Avatar
-                  label={me?.store?.name?.charAt(0).toUpperCase()}
-                  onClick={(e) => profileMenu.current.toggle(e)}
-                  className="mr-2"
-                />
+                <>
+                  <Avatar
+                    label={me?.store?.name?.trim().charAt(0).toUpperCase()}
+                    onClick={(e) => profileMenu.current.toggle(e)}
+                    className="mr-2"
+                  />
+                </>
               ),
             },
             {

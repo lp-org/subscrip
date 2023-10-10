@@ -125,6 +125,20 @@ var AdminApi = function (request) {
             create: function (payload) {
                 return request("POST", "admin/customer", payload);
             }
+        },
+        paymentMethod: {
+            list: function () {
+                return request("GET", "admin/payment-method");
+            },
+            getStorePaymentMethod: function (paymentMethodId) {
+                return request("GET", "admin/payment-method/".concat(paymentMethodId));
+            },
+            getStorePaymentMethod: function (id) {
+                return request("GET", "admin/payment-method/".concat(id));
+            },
+            stripeConnectAccount: function (payload) {
+                return request("POST", "admin/payment-method/stripe-connect-account", payload);
+            }
         }
     };
 };

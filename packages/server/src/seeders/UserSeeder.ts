@@ -1,6 +1,6 @@
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import EventBusService from "../services/EventBusService";
-import { currency, plan } from "db";
+import { currency, paymentMethod, plan } from "db";
 import { CurrencyType, currencies } from "utils-data";
 import { Logger } from "winston";
 import PaymentGatewayService from "../services/PaymentGatewayService";
@@ -22,6 +22,7 @@ export default class UserSeeder {
     this.seedUser();
     this.seedCurrency();
     this.seedPlan();
+    this.seedPaymentMethod();
   }
 
   async seedUser() {
@@ -71,6 +72,16 @@ export default class UserSeeder {
         });
       });
       this.logger_.info("Seeded Plan");
+    }
+  }
+
+  async seedPaymentMethod() {
+    const paymentMethodList = await this.db_.select().from(paymentMethod);
+    if (paymentMethodList.length == 0) {
+      await this.db_.insert(paymentMethod).values({
+        id: "stripe-connect",
+        name: "Stripe Connect",
+      });
     }
   }
 }

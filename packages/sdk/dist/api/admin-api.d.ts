@@ -2,7 +2,7 @@ import { Store, User } from "db";
 import clientRequest from "../client";
 import { AxiosResponse } from "axios";
 import UserService from "server/src/services/UserService";
-import StoreService, { updateStoreSettingDTOType } from "server/src/services/StoreService";
+import StoreService from "server/src/services/StoreService";
 import RoomService from "server/src/services/RoomService";
 import PaymentGatewayService from "server/src/services/PaymentGatewayService";
 import PlanService from "server/src/services/PlanService";
@@ -10,8 +10,10 @@ import StoreBillingService from "server/src/services/StoreBillingService";
 import BookingService from "server/src/services/BookingService";
 import CustomerService from "server/src/services/CustomerService";
 import GalleryService from "server/src/services/GalleryService";
+import PaymentMethodService from "server/src/services/PaymentMethodService";
 import { createBookingDTOType } from "server";
-import { deleteFileType, updateRoomType, updateRoomImageType, disabledBookingDateType, bookingCalendarType, createCustomerType, createRoomType } from "utils-data";
+import { deleteFileType, updateRoomType, updateRoomImageType, disabledBookingDateType, bookingCalendarType, createCustomerType, createRoomType, stripeConnectAccountType } from "utils-data";
+type AxiosReturn<T> = Promise<AxiosResponse<Awaited<ReturnType<T>>>>;
 declare const AdminApi: (request: typeof clientRequest) => {
     user: {
         get(): Promise<AxiosResponse<User[]>>;
@@ -76,6 +78,12 @@ declare const AdminApi: (request: typeof clientRequest) => {
     customer: {
         list(params: any): Promise<AxiosResponse<Awaited<ReturnType<CustomerService["list"]>>>>;
         create(payload: createCustomerType): Promise<AxiosResponse<Awaited<ReturnType<CustomerService["create"]>>>>;
+    };
+    paymentMethod: {
+        list(): AxiosReturn<PaymentMethodService["list"]>;
+        getStorePaymentMethod(paymentMethodId: string): AxiosReturn<PaymentMethodService["getStorePaymentMethod"]>;
+        getStorePaymentMethod(id: string): AxiosReturn<PaymentMethodService["getStorePaymentMethod"]>;
+        stripeConnectAccount(payload: stripeConnectAccountType): AxiosReturn<PaymentMethodService["getStripeConnectLink"]>;
     };
 };
 export default AdminApi;

@@ -1,13 +1,14 @@
-import { roomSchema } from "@/schema";
+"use client";
 import Image from "next/image";
 import React from "react";
-import { z } from "zod";
 import Link from "next/link";
-import { displayPrice } from "@/lib/utils";
-import { Button } from "../ui/button";
+
 import { Users } from "lucide-react";
-import BackendImage from "../BackendImage";
-const HotelCard = ({ data }: { data: z.infer<typeof roomSchema> }) => {
+
+import { formatPrice } from "../../../../packages/ui";
+import { Button } from "@radix-ui/themes";
+import { Room } from "db";
+const HotelCard = ({ data }: { data: Room }) => {
   return (
     <div>
       <div className="w-full rounded-lg border border-gray-200 bg-white shadow">
@@ -16,11 +17,11 @@ const HotelCard = ({ data }: { data: z.infer<typeof roomSchema> }) => {
             href={`/listings/${data.id}`}
             className="col-span-3 lg:col-span-1"
           >
-            <BackendImage
+            <Image
               width={1200}
               height={900}
               className=" h-56 w-full rounded-t-lg object-cover p-0 lg:p-4"
-              src={data.images[0] || "/placeholder-image.png"}
+              src={data.images[0]?.url || "/_assets/placeholder.png"}
               alt="product image"
             />
           </Link>
@@ -44,7 +45,7 @@ const HotelCard = ({ data }: { data: z.infer<typeof roomSchema> }) => {
               <div>
                 <span className="text-xs lg:text-sm">Price from </span>
                 <span className="font-bold text-gray-900 lg:text-xl">
-                  {displayPrice(data.basePrice)}
+                  {formatPrice(data.basePrice, "MYR")}
                 </span>
               </div>
 

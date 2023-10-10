@@ -90,6 +90,34 @@ export default class PaymentGatewayService {
     return paymentMethod;
   }
 
+  async createConnectedAccount() {
+    const account = await this.stripeApi.accounts.create({
+      type: "standard",
+    });
+
+    return account;
+  }
+
+  async createConnectedAccountLink(
+    connectedAccountId: string,
+    refresh_url: string,
+    return_url: string
+  ) {
+    const link = await this.stripeApi.accountLinks.create({
+      account: connectedAccountId,
+      refresh_url,
+      return_url,
+      type: "account_onboarding",
+    });
+
+    return link;
+  }
+
+  async getConnectedAccount(id: string) {
+    const account = await this.stripeApi.accounts.retrieve(id);
+    return account;
+  }
+
   async createSession(planId: string) {
     return await this.db_.transaction(async (tx) => {
       const planData = await tx.select().from(plan).where(eq(plan.id, planId));

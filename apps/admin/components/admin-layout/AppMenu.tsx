@@ -53,6 +53,18 @@ const AppMenu = () => {
           label: "Store Settings",
           icon: "pi pi-fw pi-cog",
           to: `/store/${storeId}/settings`,
+          items: [
+            {
+              label: "Store Settings",
+              to: `/store/${storeId}/settings`,
+              preventExact: true,
+            },
+            {
+              label: "Store Payment Method",
+              to: `/store/${storeId}/payment-method`,
+              preventExact: true,
+            },
+          ],
         },
         {
           label: "Users & Permissions",

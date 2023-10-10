@@ -11,6 +11,7 @@ const DataTable = React.forwardRef<
   <PrimitiveDataTable.DataTable
     ref={ref}
     {...props}
+    rowsPerPageOptions={[10, 25, 50]}
     {...(props.onRowClick && {
       onRowClick: (e) => {
         if (props?.onRowClick) {
@@ -28,5 +29,13 @@ const DataTable = React.forwardRef<
 
 DataTable.displayName = PrimitiveDataTable.DataTable.name;
 
-const Column = PrimitiveColumn.Column;
+const Column = React.forwardRef<
+  React.ElementRef<typeof PrimitiveColumn.Column>,
+  React.ComponentPropsWithoutRef<typeof PrimitiveColumn.Column>
+>(({ className, ...props }, ref) => (
+  <PrimitiveColumn.Column ref={ref} {...props} />
+));
+
+Column.displayName = PrimitiveColumn.Column.name;
+
 export { DataTable, Column };

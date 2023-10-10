@@ -1,16 +1,20 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
+
 import React, { useEffect } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import Image from "next/image";
-import { Button } from "../ui/button";
 import "yet-another-react-lightbox/plugins/counter.css";
 import Counter from "yet-another-react-lightbox/plugins/counter";
-import BackendImage from "../BackendImage";
-import { useCurrentWidth } from "@/lib/hooks";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
-const RoomCarousel = ({ images }: { images: string[] }) => {
+
+import { Gallery } from "db";
+import Image from "next/image";
+import { Button } from "@radix-ui/themes";
+import { useMobileView } from "ui";
+
+const RoomCarousel = ({ images }: { images: Gallery[] }) => {
   const [open, setOpen] = React.useState(false);
   // Add empty strings to the array if its length is less than 10
   // const paddedImages =
@@ -24,7 +28,8 @@ const RoomCarousel = ({ images }: { images: string[] }) => {
       mainRef.current.sync(thumbsRef.current.splide);
     }
   }, []);
-  const width = useCurrentWidth();
+  const isMobileView = useMobileView();
+  // const width = useCurrentWidth();
   return (
     <>
       {/* <div className="relative grid h-72 grid-cols-4 grid-rows-2 gap-2">
@@ -75,8 +80,8 @@ const RoomCarousel = ({ images }: { images: string[] }) => {
         >
           {images.map((el, i) => (
             <SplideSlide key={i}>
-              <BackendImage
-                src={el}
+              <Image
+                src={el.url}
                 width={1200}
                 height={800}
                 alt="banner"
@@ -113,8 +118,8 @@ const RoomCarousel = ({ images }: { images: string[] }) => {
         >
           {images.map((el, i) => (
             <SplideSlide key={i} className=" hover:cursor-pointer">
-              <BackendImage
-                src={el}
+              <Image
+                src={el.url}
                 width={1200}
                 height={800}
                 alt="banner"
@@ -125,7 +130,7 @@ const RoomCarousel = ({ images }: { images: string[] }) => {
         </Splide>
         <Button
           type="button"
-          variant="secondary"
+          variant="surface"
           onClick={() => setOpen(true)}
           className="absolute right-0 top-0 m-2 bg-black text-white opacity-75 hover:bg-black hover:opacity-100"
         >
@@ -138,9 +143,9 @@ const RoomCarousel = ({ images }: { images: string[] }) => {
         open={open}
         close={() => setOpen(false)}
         slides={images.map((image) => ({
-          src: image,
+          src: image.url,
           imageFit: "cover",
-          height: width > 600 ? 640 : 300,
+          height: isMobileView ? 300 : 640,
           width: 960,
         }))}
       />

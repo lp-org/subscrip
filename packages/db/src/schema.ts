@@ -28,7 +28,33 @@ export const store = pgTable("store", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
-export const storeSite = pgTable("storeSite", {
+export const paymentMethod = pgTable("payment_method", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+});
+
+export const storePaymentMethod = pgTable("store_payment_method", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
+  paymentMethodId: text("payment_method_id").references(() => paymentMethod.id),
+  connectedAccountId: text("connected_account_id"),
+  status: text("status").$type<"pending" | "active">().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const tempAccountId = pgTable("temp_account_id", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  storePaymentMethodId: uuid("store_payment_method_id").references(
+    () => storePaymentMethod.id
+  ),
+  accountId: text("account_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const storeSite = pgTable("store_site", {
   id: uuid("id").defaultRandom().primaryKey(),
   url: text("url").unique(),
   isCustomDomain: boolean("is_custom_domain").default(false),
@@ -54,7 +80,9 @@ export const plan = pgTable("plan", {
 
 export const storeSubscriptionPlan = pgTable("store_subscription_plan", {
   id: uuid("id").defaultRandom().primaryKey(),
-  storeId: uuid("store_id").references(() => store.id),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   planId: uuid("plan_id").references(() => plan.id),
   status: text("status")
     .$type<StripeSubscriptionStatusType>()
@@ -178,7 +206,9 @@ export const customer = pgTable("customer", {
   email: text("email").notNull(),
   phone: text("phone"),
   password: text("password"),
-  storeId: uuid("store_id").references(() => store.id),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -216,10 +246,33 @@ export const room = pgTable("room", {
   basePrice: integer("base_price").default(0).notNull(),
   quantity: integer("quantity").default(0),
   maximumOccupancy: integer("maximum_occupancy").default(0),
-  published: boolean("published").default(false),
-  storeId: uuid("store_id").references(() => store.id),
+  status: text("status").$type<"published" | "draft">().default("draft"),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const collection = pgTable("collection", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const roomCollections = pgTable("room_collections", {
+  roomId: uuid("room_id").references(() => room.id, {
+    onDelete: "cascade",
+  }),
+  collectionId: uuid("collection_id").references(() => collection.id, {
+    onDelete: "cascade",
+  }),
+  position: integer("position").default(0),
 });
 
 export const roomImages = pgTable("room_images", {
@@ -280,11 +333,14 @@ export const booking = pgTable("booking", {
   paymentStatus: text("payment_status")
     .$type<BookingPaymentStatusType>()
     .default("not_paid"),
+  currency: text("currency").references(() => currency.code),
   bookingNo: serial("booking_no"),
   additionalData: jsonb("additional_data"),
   customerId: uuid("customer_id").references(() => customer.id),
   createdBy: uuid("created_by").references(() => user.id),
-  storeId: uuid("store_id").references(() => store.id),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -312,7 +368,9 @@ export const payment = pgTable("payment", {
   status: text("status").$type<"pending" | "success" | "failed">(),
   type: text("type").$type<"cash" | "online">(),
   reference: text("reference"),
-  storeId: uuid("store_id").references(() => store.id),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -327,19 +385,19 @@ export const paymentProvider = pgTable("payment_provider", {
   name: text("name"),
 });
 
-export const paymentMethod = pgTable("payment_method", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  paymentProvider: text("payment_provider").references(
-    () => paymentProvider.key
-  ),
-  storeId: uuid("store_id").references(() => store.id),
-  type: text("type").$type<"cash" | "online">(),
-  connectedAccountId: text("connected_account_id"),
-  clientKey: text("client_key"),
-  secretKey: text("secret_key"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+// export const paymentMethod = pgTable("payment_method", {
+//   id: uuid("id").defaultRandom().primaryKey(),
+//   paymentProvider: text("payment_provider").references(
+//     () => paymentProvider.key
+//   ),
+//   storeId: uuid("store_id").notNull().references(() => store.id),
+//   type: text("type").$type<"cash" | "online">(),
+//   connectedAccountId: text("connected_account_id"),
+//   clientKey: text("client_key"),
+//   secretKey: text("secret_key"),
+//   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+//   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+// });
 
 export const paymentRelations = relations(payment, ({ one }) => ({
   booking: one(booking, {
@@ -353,7 +411,9 @@ export const activityLog = pgTable("activity_log", {
   event: text("event"),
   payload: json("payload"),
   userId: integer("user_id").notNull(),
-  storeId: uuid("store_id").references(() => store.id),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
@@ -363,7 +423,9 @@ export const gallery = pgTable("gallery", {
   fileKey: text("file_key").notNull(),
   fileType: text("file_type"),
   size: integer("size"),
-  storeId: uuid("store_id").references(() => store.id),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
@@ -414,7 +476,9 @@ export const contactUs = pgTable("contact_us", {
   email: text("email"),
   name: text("name"),
   message: text("message"),
-  storeId: uuid("store_id").references(() => store.id),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

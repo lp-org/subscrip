@@ -1,6 +1,7 @@
 // import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import "@radix-ui/themes/styles.css";
+
 // import "nprogress/nprogress.css";
 import { Inter } from "next/font/google";
 

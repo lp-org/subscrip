@@ -64,6 +64,7 @@ export default class BookingService extends BaseService {
         totalAmount: validated.totalAmount,
         customerId: validated.customerId,
         status: "booked",
+        currency: this.currentStore_.currency,
         storeId: this.currentStore_.storeId,
       });
     });

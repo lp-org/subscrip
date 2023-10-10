@@ -4,10 +4,12 @@ import StoreBillingService from "../../services/StoreBillingService";
 import { Stripe } from "stripe";
 import { raw } from "body-parser";
 import PaymentGatewayService from "../../services/PaymentGatewayService";
+import PaymentMethodService from "../../services/PaymentMethodService";
 
 type InjectedDependencies = {
   storeBillingService: StoreBillingService;
   paymentGatewayService: PaymentGatewayService;
+  paymentMethodService: PaymentMethodService;
 };
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-08-16",
@@ -17,12 +19,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export default class StripeWebhookApi {
   protected readonly storeBillingService_: StoreBillingService;
   protected readonly paymentGatewayService_: PaymentGatewayService;
+  protected readonly paymentMethodService_: PaymentMethodService;
   constructor({
     storeBillingService,
     paymentGatewayService,
+    paymentMethodService,
   }: InjectedDependencies) {
     this.storeBillingService_ = storeBillingService;
     this.paymentGatewayService_ = paymentGatewayService;
+    this.paymentMethodService_ = paymentMethodService;
   }
 
   @route("/stripe")
@@ -122,6 +127,11 @@ export default class StripeWebhookApi {
           // handle subscription canceled automatically based
           // upon your subscription settings.
         }
+        break;
+
+      case "account.updated":
+        const accountId = dataObject.id;
+        await this.paymentMethodService_.updateAccount(accountId);
         break;
       default:
       // Unexpected event type

@@ -1,7 +1,10 @@
 import { DELETE, GET, POST, PUT, route } from "awilix-express";
 import { Request, Response } from "express";
 import RoomService from "../../services/RoomService";
-
+import { listFilterDTO } from "utils-data";
+import { pageConfig, whereFilter } from "../../utils/build-query";
+import { room as roomDB } from "db";
+import { getTableColumns } from "drizzle-orm";
 type InjectedDependencies = {
   roomService: RoomService;
 };
@@ -16,17 +19,13 @@ export default class RoomApi {
   @route("/")
   @GET()
   async list(req: Request, res: Response) {
-    const { offset, limit, ...rest } = req.query;
+    const { filters, ...rest } = listFilterDTO.parse(req.query);
+
     const room = await this.roomService_.list(
-      {
-        ...rest,
-        q: req.query.q && ["name", req.query.q],
-      },
-      {
-        limit: parseInt(req.query?.limit as string) as number,
-        offset: parseInt(req.query?.offset as string) as number,
-      }
+      whereFilter(filters, roomDB),
+      pageConfig(rest)
     );
+
     res.json(room);
   }
 

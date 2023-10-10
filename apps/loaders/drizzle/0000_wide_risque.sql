@@ -1,12 +1,38 @@
 CREATE TABLE IF NOT EXISTS "store" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" text DEFAULT 'My Store' NOT NULL,
 	"email" text,
-	"url" text,
+	"plan" text,
+	"plan_status" text,
 	"active" boolean DEFAULT true,
 	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "payment_method" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "store_payment_method" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"store_id" uuid,
+	"payment_method_id" text,
+	"connected_account_id" text,
+	"status" text,
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "store_site" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"url" text,
+	"is_custom_domain" boolean DEFAULT false,
+	"domain" text,
+	"store_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
-	CONSTRAINT "store_url_unique" UNIQUE("url")
+	CONSTRAINT "store_site_url_unique" UNIQUE("url"),
+	CONSTRAINT "store_site_store_id_unique" UNIQUE("store_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "plan" (
@@ -108,8 +134,7 @@ CREATE TABLE IF NOT EXISTS "room" (
 CREATE TABLE IF NOT EXISTS "room_images" (
 	"room_id" uuid,
 	"gallery_id" uuid,
-	"position" integer DEFAULT 0,
-	CONSTRAINT room_images_room_id_gallery_id PRIMARY KEY("room_id","gallery_id")
+	"position" integer DEFAULT 0
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "pricing" (
@@ -159,18 +184,6 @@ CREATE TABLE IF NOT EXISTS "payment_provider" (
 	CONSTRAINT "payment_provider_key_unique" UNIQUE("key")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "payment_method" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"payment_provider" text,
-	"store_id" uuid,
-	"type" text,
-	"connected_account_id" text,
-	"client_key" text,
-	"secret_key" text,
-	"created_at" timestamp with time zone DEFAULT now(),
-	"updated_at" timestamp with time zone DEFAULT now()
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "activity_log" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event" text,
@@ -192,7 +205,7 @@ CREATE TABLE IF NOT EXISTS "gallery" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "setting" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" text,
+	"name" text DEFAULT 'My Store',
 	"email" text,
 	"logo" text,
 	"favicon" text,
@@ -257,6 +270,24 @@ CREATE TABLE IF NOT EXISTS "staged_job" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "store_payment_method" ADD CONSTRAINT "store_payment_method_store_id_store_id_fk" FOREIGN KEY ("store_id") REFERENCES "store"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "store_payment_method" ADD CONSTRAINT "store_payment_method_payment_method_id_payment_method_id_fk" FOREIGN KEY ("payment_method_id") REFERENCES "payment_method"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "store_site" ADD CONSTRAINT "store_site_store_id_store_id_fk" FOREIGN KEY ("store_id") REFERENCES "store"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "plan" ADD CONSTRAINT "plan_currency_currency_code_fk" FOREIGN KEY ("currency") REFERENCES "currency"("code") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -305,13 +336,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "room_images" ADD CONSTRAINT "room_images_room_id_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "room"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "room_images" ADD CONSTRAINT "room_images_room_id_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "room"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "room_images" ADD CONSTRAINT "room_images_gallery_id_gallery_id_fk" FOREIGN KEY ("gallery_id") REFERENCES "gallery"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "room_images" ADD CONSTRAINT "room_images_gallery_id_gallery_id_fk" FOREIGN KEY ("gallery_id") REFERENCES "gallery"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -354,18 +385,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "payment" ADD CONSTRAINT "payment_store_id_store_id_fk" FOREIGN KEY ("store_id") REFERENCES "store"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "payment_method" ADD CONSTRAINT "payment_method_payment_provider_payment_provider_key_fk" FOREIGN KEY ("payment_provider") REFERENCES "payment_provider"("key") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "payment_method" ADD CONSTRAINT "payment_method_store_id_store_id_fk" FOREIGN KEY ("store_id") REFERENCES "store"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

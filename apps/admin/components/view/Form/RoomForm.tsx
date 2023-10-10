@@ -18,6 +18,12 @@ import { InputNumber } from "primereact/inputnumber";
 import { createRoomType, updateRoomType } from "utils-data";
 import { useAdminRouter } from "../../../utils/use-admin-router";
 
+import StoreCurrencyInput from "../../Input/StoreCurrencyInput";
+import { Editor } from "primereact/editor";
+import { forEach } from "lodash";
+import { InputSwitch } from "primereact/inputswitch";
+import { Dropdown } from "primereact/dropdown";
+
 const RoomForm = ({
   payload,
   isLoading,
@@ -124,6 +130,23 @@ const RoomForm = ({
                 <label>Room Name</label>
                 <InputText {...register("name", { required: true })} />
               </div>
+              <div className="field flex flex-column mt-4">
+                <Controller
+                  name="description"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <>
+                      <label>Description</label>
+                      <Editor
+                        value={field.value || ""}
+                        onTextChange={(e) => field.onChange(e.htmlValue)}
+                        style={{ height: "220px" }}
+                      />
+                      {InputError({ name: field.name })}{" "}
+                    </>
+                  )}
+                />
+              </div>
 
               <div className="field flex flex-column mt-4">
                 <Controller
@@ -132,7 +155,7 @@ const RoomForm = ({
                   render={({ field, fieldState }) => (
                     <>
                       <label htmlFor={field.name}>Base price</label>
-                      <CurrencyInput
+                      <StoreCurrencyInput
                         value={field.value}
                         onAmountChange={field.onChange}
                       />
@@ -150,23 +173,35 @@ const RoomForm = ({
                     <UploadArea
                       title="Media"
                       onImagesChange={(e) => {
-                        mutateReorderImage({
-                          id,
-                          payload: { g_ids: e.map((el) => el.id) },
-                        });
+                        if (payload) {
+                          mutateReorderImage({
+                            id,
+                            payload: { g_ids: e.map((el) => el.id) },
+                          });
+                        } else {
+                          field.onChange(e.map((el) => el.id));
+                        }
                       }}
                       onNewImagesChange={(e) => {
-                        mutateUpsertImage({
-                          id,
-                          payload: { g_ids: e.map((el) => el.id) },
-                        });
+                        if (payload) {
+                          mutateUpsertImage({
+                            id,
+                            payload: { g_ids: e.map((el) => el.id) },
+                          });
+                        } else {
+                          field.onChange(e.map((el) => el.id));
+                        }
                       }}
                       images={field.value}
                       onDeleteImage={(e) => {
-                        mutateDeleteImage({
-                          id,
-                          payload: { g_ids: e.map((el) => el.id) },
-                        });
+                        if (payload) {
+                          mutateDeleteImage({
+                            id,
+                            payload: { g_ids: e.map((el) => el.id) },
+                          });
+                        } else {
+                          field.onChange(e.map((el) => el.id));
+                        }
                       }}
                     />
                   </>
@@ -188,7 +223,27 @@ const RoomForm = ({
             </Card>
           </div>
           <div className="col-12 md:col-4">
-            <Card title="Publishing"></Card>
+            <Card title="Publishing">
+              <Controller
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <div className="field flex flex-column mt-4">
+                    <label>Status</label>
+                    <Dropdown
+                      options={["published", "draft"]}
+                      value={field.value}
+                      onChange={(e) => {
+                        field.onChange(e.value);
+                        if (payload) {
+                          mutateUpdate({ id, payload: { status: e.value } });
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              />
+            </Card>
           </div>
         </div>
       </form>

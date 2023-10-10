@@ -1,6 +1,9 @@
 import {
   AnyColumn,
+  AnyTable,
   Column,
+  InferModel,
+  InferSelectModel,
   SQL,
   Table,
   TableConfig,
@@ -9,13 +12,21 @@ import {
   desc,
   eq,
   getTableColumns,
+  gt,
+  gte,
   ilike,
   inArray,
   is,
+  lt,
+  lte,
+  ne,
+  or,
+  sql,
 } from "drizzle-orm";
 import { AnyPgTable, PgTableFn, PgTableWithColumns } from "drizzle-orm/pg-core";
 import { FilterType } from "../types";
-import { SchemaType, store } from "db";
+import { SchemaType, gallery, roomImages, store } from "db";
+import { ListFilter } from "utils-data";
 
 export function buildQuery<
   T extends Table<
@@ -102,4 +113,70 @@ export function whereEqQuery(
   }
 
   return where;
+}
+
+export function whereFilter(
+  filter: Record<string, any> | undefined,
+  table_: ReturnType<PgTableFn>
+) {
+  const where: SQL[] = [];
+
+  if (filter) {
+    for (const [key, value] of Object.entries(filter)) {
+      if (value?.constraints?.length && is(table_[key], Column)) {
+        const where_: SQL[] = [];
+        value?.constraints.forEach((cons: any) => {
+          if (cons.value) {
+            if (cons.matchMode === "startsWith")
+              where_.push(ilike(table_[key], `${cons.value}%`));
+            else if (cons.matchMode === "endWith")
+              where_.push(ilike(table_[key], `%${cons.value}`));
+            else if (cons.matchMode === "equals")
+              where_.push(eq(table_[key], cons.value));
+            else if (cons.matchMode === "gt")
+              where_.push(gt(table_[key], cons.value));
+            else if (cons.matchMode === "lt")
+              where_.push(lt(table_[key], cons.value));
+            else if (cons.matchMode === "gte")
+              where_.push(gte(table_[key], cons.value));
+            else if (cons.matchMode === "lte")
+              where_.push(lte(table_[key], cons.value));
+            else if (cons.matchMode === "notEqual")
+              where_.push(ne(table_[key], cons.value));
+          }
+        });
+        const operator = value.operator === "and" ? and : or;
+        const fieldWhere = operator(...where_);
+        if (fieldWhere) {
+          where.push(fieldWhere);
+        }
+      }
+    }
+  }
+
+  return where;
+}
+
+export function pageConfig(payload: ListFilter) {
+  let limit = 10;
+  let offset = 0;
+  if (payload.first) {
+    limit = parseInt(payload?.rows || "10");
+  }
+  if (payload.first) {
+    offset = parseInt(payload?.first || "0");
+  }
+  return {
+    limit,
+    offset,
+  };
+}
+
+export function jsonAgg<Table extends AnyTable<TableConfig>>(
+  table: Table,
+  orderBy?: SQL<unknown>
+) {
+  return sql<
+    InferSelectModel<Table>[]
+  >`coalesce(json_agg(${table} ${orderBy}) filter (where ${table} is not null), '[]')`;
 }

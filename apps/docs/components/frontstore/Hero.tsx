@@ -7,7 +7,7 @@ const Hero = () => {
   return (
     <header className="relative h-screen w-full bg-cover bg-no-repeat">
       <video
-        src="/beachVid.mp4"
+        src="/_assets/beachVid.mp4"
         className="h-full w-full object-cover"
         style={{ objectFit: "cover" }}
         autoPlay

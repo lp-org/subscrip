@@ -46,7 +46,7 @@ export const createRoomDTO = z.object({
   shortDescription: z.string().optional(),
   basePrice: z.number().optional(),
   maximumOccupancy: z.number().optional(),
-  published: z.boolean().optional(),
+  status: z.enum(["published", "draft"]).optional(),
 });
 
 export type createRoomType = z.infer<typeof createRoomDTO>;
@@ -58,7 +58,7 @@ export const updateRoomDTO = z.object({
   basePrice: z.number().optional(),
   maximumOccupancy: z.number().optional().nullable(),
   quantity: z.number().optional().nullable(),
-  published: z.boolean().optional().nullable(),
+  status: z.enum(["published", "draft"]).optional(),
 });
 
 export type updateRoomType = z.infer<typeof updateRoomDTO>;
@@ -100,3 +100,10 @@ export const updateStoreSiteDTO = z.object({
 });
 
 export type updateStoreSiteType = z.infer<typeof updateStoreSiteDTO>;
+
+export const stripeConnectAccountDTO = z.object({
+  refresh_url: z.string(),
+  return_url: z.string(),
+});
+
+export type stripeConnectAccountType = z.infer<typeof stripeConnectAccountDTO>;

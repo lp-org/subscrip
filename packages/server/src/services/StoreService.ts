@@ -196,7 +196,10 @@ export default class StoreService {
       await tx.insert(setting).values({ name, storeId: newStore[0].id });
 
       await tx.insert(storeSite).values({
-        url: `${name.replace(/\s+/g, "-").trim()}-${dayjs().unix()}`,
+        url: `${name
+          .replace(/\s+/g, "-")
+          .trim()
+          .toLocaleLowerCase()}-${dayjs().unix()}`,
         storeId: newStore[0].id,
       });
 
