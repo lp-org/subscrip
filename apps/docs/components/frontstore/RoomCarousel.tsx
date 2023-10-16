@@ -78,17 +78,29 @@ const RoomCarousel = ({ images }: { images: Gallery[] }) => {
             arrows: false,
           }}
         >
-          {images.map((el, i) => (
-            <SplideSlide key={i}>
+          {images.length ? (
+            images.map((el, i) => (
+              <SplideSlide key={i}>
+                <Image
+                  src={el.url}
+                  width={1200}
+                  height={800}
+                  alt="banner"
+                  className="h-[400px] object-cover lg:h-[550px]"
+                />
+              </SplideSlide>
+            ))
+          ) : (
+            <SplideSlide className=" hover:cursor-pointer">
               <Image
-                src={el.url}
+                src={"/_assets/placeholder.png"}
                 width={1200}
                 height={800}
                 alt="banner"
                 className="h-[400px] object-cover lg:h-[550px]"
               />
             </SplideSlide>
-          ))}
+          )}
         </Splide>
 
         <Splide
@@ -116,17 +128,29 @@ const RoomCarousel = ({ images }: { images: Gallery[] }) => {
           ref={thumbsRef}
           className="flex w-full justify-center rounded-b-lg border p-4"
         >
-          {images.map((el, i) => (
-            <SplideSlide key={i} className=" hover:cursor-pointer">
+          {images.length ? (
+            images.map((el, i) => (
+              <SplideSlide key={i} className=" hover:cursor-pointer">
+                <Image
+                  src={el.url}
+                  width={1200}
+                  height={800}
+                  alt="banner"
+                  className="rounded-lg object-cover"
+                />
+              </SplideSlide>
+            ))
+          ) : (
+            <SplideSlide className=" hover:cursor-pointer">
               <Image
-                src={el.url}
+                src={"/_assets/placeholder.png"}
                 width={1200}
                 height={800}
                 alt="banner"
                 className="rounded-lg object-cover"
               />
             </SplideSlide>
-          ))}
+          )}
         </Splide>
         <Button
           type="button"

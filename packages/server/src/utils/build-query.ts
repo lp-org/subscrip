@@ -25,7 +25,7 @@ import {
 } from "drizzle-orm";
 import { AnyPgTable, PgTableFn, PgTableWithColumns } from "drizzle-orm/pg-core";
 import { FilterType } from "../types";
-import { SchemaType, gallery, roomImages, store } from "db";
+import { SchemaType, gallery, room, roomImages, store } from "db";
 import { ListFilter } from "utils-data";
 
 export function buildQuery<
@@ -178,5 +178,6 @@ export function jsonAgg<Table extends AnyTable<TableConfig>>(
 ) {
   return sql<
     InferSelectModel<Table>[]
-  >`coalesce(json_agg(${table} ${orderBy}) filter (where ${table} is not null), '[]')`;
+    // @ts-ignore
+  >`coalesce(json_agg(${table} ${orderBy}) filter (where ${table["id"]} is not null), '[]')`;
 }

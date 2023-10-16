@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 
-import { Toolbar } from "primereact/toolbar";
 import { useAdminRouter } from "../../utils/use-admin-router";
 import { Column, DataTable } from "ui";
 import { Image } from "primereact/image";
@@ -15,11 +14,11 @@ import { Chip } from "primereact/chip";
 
 import { usePageConfig } from "../../utils/use-page-config";
 import { DataTablePageEvent } from "primereact/datatable";
-import { useRouter } from "next/navigation";
 import { useAdminPersistStore } from "../../store/use-admin-persist-store";
 import { Dropdown } from "primereact/dropdown";
-import { Tag } from "primereact/tag";
 import { InputNumber } from "primereact/inputnumber";
+import { MultiSelect } from "primereact/multiselect";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
 const RoomPage = () => {
   const { adminClient } = useRequest();
@@ -30,24 +29,17 @@ const RoomPage = () => {
     page: 0,
     pageCount: 1,
   });
-
-  const [p] = usePageConfig();
+  const [customFilter, setCustomFilter] = useState({});
   const filter = useAdminPersistStore((state) => state.tableFilter.booking);
-
   const setFilter = useAdminPersistStore((state) => state.setTableFilter);
-  const pageOptions = useMemo(() => {
-    const page = filter?.page || 0;
-    const offset = page * (filter?.rows || 10);
-    const limit = filter?.rows || 10;
-    return { offset, limit };
-  }, [filter]);
-
+  console.log(customFilter);
   const { data, refetch } = useQuery({
     queryFn: () => {
-      return adminClient.room.list({ pageOptions, ...filter });
+      return adminClient.room.list({ ...filter, ...customFilter });
     },
-    queryKey: ["roomList", { ...pageOptions, filter }],
+    queryKey: ["roomList", { ...filter, ...customFilter }],
   });
+
   const [selectedRooms, setSelectedRooms] = useState([]);
   const rooms = data?.data.room;
 
@@ -56,6 +48,7 @@ const RoomPage = () => {
     return (
       <React.Fragment>
         <div className="flex">
+          <Filters onSave={setCustomFilter} />
           <Button
             label="New"
             icon="pi pi-plus"
@@ -168,3 +161,53 @@ const RoomPage = () => {
 };
 
 export default RoomPage;
+
+interface FilterFormType {
+  collection_id: string[] | string;
+}
+interface FiltersType {
+  onSave: (e: FilterFormType) => void;
+  onClear?: () => void;
+}
+
+const Filters = ({ onSave, onClear }: FiltersType) => {
+  const { adminClient } = useRequest();
+  const { data: collectionData } = useQuery({
+    queryFn: () => {
+      return adminClient.collection.list({});
+    },
+    queryKey: ["collectionList"],
+  });
+  const collectios = collectionData?.data.collection;
+
+  const { register, control, handleSubmit } = useForm<FilterFormType>({});
+  const onSubmit: SubmitHandler<FilterFormType> = (data) => {
+    onSave({
+      collection_id: data.collection_id.join(","),
+    });
+  };
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex gap-4">
+        <Controller
+          control={control}
+          name="collection_id"
+          render={({ field }) => (
+            <MultiSelect
+              options={collectios}
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Collections"
+              maxSelectedLabels={2}
+              className="w-full md:w-20rem"
+              value={field.value}
+              onChange={field.onChange}
+            />
+          )}
+        ></Controller>
+
+        <Button>Apply</Button>
+      </div>
+    </form>
+  );
+};

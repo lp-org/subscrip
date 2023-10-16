@@ -11,8 +11,9 @@ import BookingService from "server/src/services/BookingService";
 import CustomerService from "server/src/services/CustomerService";
 import GalleryService from "server/src/services/GalleryService";
 import PaymentMethodService from "server/src/services/PaymentMethodService";
+import CollectionService from "server/src/services/CollectionService";
 import { createBookingDTOType } from "server";
-import { deleteFileType, updateRoomType, updateRoomImageType, disabledBookingDateType, bookingCalendarType, createCustomerType, createRoomType, stripeConnectAccountType } from "utils-data";
+import { deleteFileType, updateRoomType, updateRoomImageType, disabledBookingDateType, bookingCalendarType, createCustomerType, createRoomType, stripeConnectAccountType, updateCollectionType, deleteCollectionRoomType } from "utils-data";
 type AxiosReturn<T> = Promise<AxiosResponse<Awaited<ReturnType<T>>>>;
 declare const AdminApi: (request: typeof clientRequest) => {
     user: {
@@ -57,6 +58,19 @@ declare const AdminApi: (request: typeof clientRequest) => {
         }): Promise<AxiosResponse<Awaited<ReturnType<RoomService["reorderImage"]>>>>;
         list(params: any): Promise<AxiosResponse<Awaited<ReturnType<RoomService["list"]>>>>;
         get(id: string): Promise<AxiosResponse<Awaited<ReturnType<RoomService["get"]>>>>;
+    };
+    collection: {
+        list(params: any): AxiosReturn<CollectionService["list"]>;
+        get(id: string): AxiosReturn<CollectionService["get"]>;
+        deleteCollectionRoom({ id, payload, }: {
+            id: string;
+            payload: deleteCollectionRoomType;
+        }): AxiosReturn<CollectionService["deleteCollectionRoom"]>;
+        create(payload: createCustomerType): AxiosReturn<CollectionService["create"]>;
+        update({ id, payload, }: {
+            id: string;
+            payload: updateCollectionType;
+        }): AxiosReturn<CollectionService["update"]>;
     };
     plan: {
         list(): Promise<AxiosResponse<Awaited<ReturnType<PlanService["list"]>>>>;

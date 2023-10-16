@@ -79,6 +79,25 @@ var AdminApi = function (request) {
                 return request("GET", "admin/rooms/".concat(id));
             }
         },
+        collection: {
+            list: function (params) {
+                return request("GET", "admin/collections", params);
+            },
+            get: function (id) {
+                return request("GET", "admin/collections/".concat(id));
+            },
+            deleteCollectionRoom: function (_a) {
+                var id = _a.id, payload = _a.payload;
+                return request("DELETE", "admin/collections/room/".concat(id), payload);
+            },
+            create: function (payload) {
+                return request("POST", "admin/collections", payload);
+            },
+            update: function (_a) {
+                var id = _a.id, payload = _a.payload;
+                return request("PUT", "admin/collections/".concat(id), payload);
+            }
+        },
         plan: {
             list: function () {
                 return request("GET", "admin/plans");

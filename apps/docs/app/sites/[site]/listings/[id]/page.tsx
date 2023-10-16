@@ -16,6 +16,7 @@ async function getData(params: any) {
   const data = await req.room.get(params.id);
 
   const rooms = data?.data;
+
   return rooms;
 }
 const RoomListing = async ({ params }) => {

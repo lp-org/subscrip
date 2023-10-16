@@ -76,6 +76,7 @@ export default class UserAPI {
   async logout(req: Request, res: Response) {
     // @ts-ignore
     req.session.jwt = {};
+    res.clearCookie("jwt");
     res.json({});
   }
 }

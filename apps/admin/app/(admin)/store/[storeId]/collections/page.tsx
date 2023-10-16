@@ -1,7 +1,16 @@
 import React from "react";
+import CollectionPage from "../../../../../components/view/CollectionPage";
 
 const Collections = () => {
-  return <div>Collections</div>;
+  return (
+    <>
+      <CollectionPage />
+    </>
+  );
 };
 
 export default Collections;
+
+export const metadata = {
+  title: "Collection",
+};

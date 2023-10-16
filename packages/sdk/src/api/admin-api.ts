@@ -19,6 +19,7 @@ import BookingService from "server/src/services/BookingService";
 import CustomerService from "server/src/services/CustomerService";
 import GalleryService from "server/src/services/GalleryService";
 import PaymentMethodService from "server/src/services/PaymentMethodService";
+import CollectionService from "server/src/services/CollectionService";
 import { createBookingDTOType } from "server";
 import {
   deleteFileType,
@@ -29,6 +30,8 @@ import {
   createCustomerType,
   createRoomType,
   stripeConnectAccountType,
+  updateCollectionType,
+  deleteCollectionRoomType,
 } from "utils-data";
 // @ts-ignore
 type AxiosReturn<T> = Promise<AxiosResponse<Awaited<ReturnType<T>>>>;
@@ -160,6 +163,38 @@ const AdminApi = (request: typeof clientRequest) => {
         id: string
       ): Promise<AxiosResponse<Awaited<ReturnType<RoomService["get"]>>>> {
         return request("GET", `admin/rooms/${id}`);
+      },
+    },
+
+    collection: {
+      list(params: any): AxiosReturn<CollectionService["list"]> {
+        return request("GET", "admin/collections", params);
+      },
+      get(id: string): AxiosReturn<CollectionService["get"]> {
+        return request("GET", `admin/collections/${id}`);
+      },
+      deleteCollectionRoom({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: deleteCollectionRoomType;
+      }): AxiosReturn<CollectionService["deleteCollectionRoom"]> {
+        return request("DELETE", `admin/collections/room/${id}`, payload);
+      },
+      create(
+        payload: createCustomerType
+      ): AxiosReturn<CollectionService["create"]> {
+        return request("POST", "admin/collections", payload);
+      },
+      update({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: updateCollectionType;
+      }): AxiosReturn<CollectionService["update"]> {
+        return request("PUT", `admin/collections/${id}`, payload);
       },
     },
     plan: {

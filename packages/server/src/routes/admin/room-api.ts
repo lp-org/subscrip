@@ -19,11 +19,12 @@ export default class RoomApi {
   @route("/")
   @GET()
   async list(req: Request, res: Response) {
-    const { filters, ...rest } = listFilterDTO.parse(req.query);
+    const { filters, collection_id, ...rest } = listFilterDTO.parse(req.query);
 
     const room = await this.roomService_.list(
       whereFilter(filters, roomDB),
-      pageConfig(rest)
+      pageConfig(rest),
+      { collection_id }
     );
 
     res.json(room);

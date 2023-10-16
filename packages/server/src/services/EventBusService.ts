@@ -38,7 +38,7 @@ export default class EventBusService {
     this.shouldEnqueuerRun = false;
 
     if (process.env.NODE_ENV !== "test" && isSingleton) {
-      this.startEnqueuer();
+      // this.startEnqueuer();
     }
   }
 

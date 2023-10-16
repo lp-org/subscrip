@@ -4,6 +4,7 @@ import {
   Room,
   gallery,
   room,
+  roomCollections,
   roomImages,
   roomSchema,
   store,
@@ -40,7 +41,9 @@ type InjectedDependencies = {
   currentStore: CurrentStore;
   galleryService: GalleryService;
 };
-
+interface RoomFilter {
+  collection_id?: string;
+}
 export default class RoomService extends BaseService {
   static [RESOLVER] = {};
   protected override readonly db_: PgJsDatabaseType;
@@ -58,7 +61,8 @@ export default class RoomService extends BaseService {
 
   async list(
     filter: SQL<unknown>[],
-    pageConfig?: PageConfig
+    pageConfig?: PageConfig,
+    roomFilter?: RoomFilter
   ): Promise<{ room: Room[]; count: number }> {
     // const query = this.db_.query.room.findMany({
     //   with: {
@@ -85,31 +89,44 @@ export default class RoomService extends BaseService {
       .select({
         ...roomColumns,
         images: jsonAgg(gallery, sql`ORDER BY ${roomImages.position}`),
+        ...(roomFilter?.collection_id
+          ? {
+              collection_count:
+                sql<number>`COUNT(${roomCollections.position})`.mapWith(Number),
+            }
+          : {}),
       })
       .from(room)
       .leftJoin(roomImages, eq(roomImages.roomId, room.id))
       .leftJoin(gallery, eq(roomImages.galleryId, gallery.id))
       .groupBy(room.id)
       .where(and(...filter, eq(room.storeId, this.currentStore_.storeId)))
-
       .orderBy(desc(room.createdAt));
 
     if (pageConfig?.offset !== undefined && pageConfig?.limit !== undefined) {
       query = query.offset(pageConfig?.offset).limit(pageConfig?.limit);
     }
-    const data = await query;
 
+    if (roomFilter) {
+      const { collection_id } = roomFilter;
+
+      if (collection_id && collection_id.length) {
+        query = query
+
+          .innerJoin(roomCollections, eq(roomCollections.roomId, room.id))
+          .where(
+            inArray(roomCollections.collectionId, collection_id.split(","))
+          )
+          .groupBy(room.id);
+      }
+    }
+
+    const data = await query;
     const count = await this.listCountByStore(
       and(...filter, eq(room.storeId, this.currentStore_.storeId)),
       room
     );
-    // const data = await this.listByStore(
-    //   filter,
-    //   room,
 
-    //   pageConfig
-    // );
-    // const result = { ...data, room: data.room.map((el) => ({ ...el })) };
     return {
       room: data,
       count,

@@ -23,6 +23,12 @@ export default class CreateUserApi {
     this.db_ = db;
     this.authService_ = authService;
   }
+
+  private signToken(userId: string) {
+    return jwt.sign({ userId }, process.env.JWT_SECRET || "secret", {
+      expiresIn: "24h",
+    });
+  }
   @route("/register")
   @POST()
   async createUser(req: Request, res: Response) {
@@ -32,9 +38,9 @@ export default class CreateUserApi {
 
     if (result) {
       // @ts-ignore
-      req.session.jwt = jwt.sign({ userId: result.id }, "secret", {
-        expiresIn: "24h",
-      });
+
+      // req.session.jwt = this.signToken(result.id);
+      res.cookie("jwt", this.signToken(result.id));
     }
     res.json(result);
   }
@@ -47,11 +53,10 @@ export default class CreateUserApi {
     const result = await this.authService_.authenticate(email, password);
 
     if (result) {
+      const token = this.signToken(result.id);
       // @ts-ignore
-      req.session.jwt = jwt.sign({ userId: result.id }, "secret", {
-        expiresIn: "24h",
-      });
-
+      // req.session.jwt = token;
+      res.cookie("jwt", token);
       res.json({ user: result });
     } else {
       res.sendStatus(401);

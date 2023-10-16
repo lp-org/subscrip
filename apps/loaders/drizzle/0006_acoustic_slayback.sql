@@ -1,0 +1,1 @@
+ALTER TABLE "collection" ADD COLUMN "status" text DEFAULT 'draft' NOT NULL;

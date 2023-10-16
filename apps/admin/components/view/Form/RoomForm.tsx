@@ -32,7 +32,7 @@ const RoomForm = ({
   isLoading: boolean;
 }) => {
   const params = useParams();
-  const id: string = params.id;
+  const id = params.id as string;
   const { adminClient } = useRequest();
   const { showToast } = useToast();
   const invalidateQuries = () => {

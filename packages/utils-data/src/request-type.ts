@@ -107,3 +107,25 @@ export const stripeConnectAccountDTO = z.object({
 });
 
 export type stripeConnectAccountType = z.infer<typeof stripeConnectAccountDTO>;
+
+export const createCollectionDTO = z.object({
+  name: z.string().min(1, "Collection name is required"),
+  room_id: z.array(z.string()),
+  status: z.enum(["published", "draft"]),
+});
+
+export type createCollectionType = z.infer<typeof createCollectionDTO>;
+
+export const updateCollectionDTO = z.object({
+  name: z.string().optional(),
+  room_id: z.array(z.string()).optional(),
+  status: z.enum(["published", "draft"]).optional(),
+});
+
+export type updateCollectionType = z.infer<typeof updateCollectionDTO>;
+
+export const deleteCollectionRoomDTO = z.object({
+  room_id: z.array(z.string()),
+});
+
+export type deleteCollectionRoomType = z.infer<typeof deleteCollectionRoomDTO>;

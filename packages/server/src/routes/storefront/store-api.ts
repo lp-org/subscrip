@@ -17,7 +17,6 @@ export default class StoreApi {
   @GET()
   async get(req: Request, res: Response) {
     const store = await this.storeService_.retrieveByUrl(req.params.url);
-    console.log(req.params.url);
     res.json({ store });
   }
 

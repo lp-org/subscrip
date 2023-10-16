@@ -15,6 +15,7 @@ import {
   store,
   storeSubscriptionPlan,
   gallery,
+  collection,
 } from "../schema";
 
 export type StripeSubscriptionStatusType =
@@ -62,3 +63,5 @@ export type Gallery = typeof gallery.$inferSelect;
 export type Room = typeof room.$inferSelect & {
   images: Gallery[];
 };
+
+export type Collection = typeof collection.$inferSelect;

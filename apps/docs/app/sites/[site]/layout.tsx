@@ -6,18 +6,10 @@ import React from "react";
 import Footer from "../../../components/frontstore/Footer";
 import Navbar from "../../../components/frontstore/Navbar";
 import { serverApiRequest } from "../../../utils/server-client-request";
-
-async function getData(params: any) {
-  const req = serverApiRequest(params.site);
-
-  const data = await req.store.getSetting(params.site);
-
-  const store = data.data;
-  return store;
-}
+import { getStoreSetting } from "../../../utils/get-store-setting";
 
 const FrontStoreLayout = async ({ children, params }) => {
-  const data = await getData(params);
+  const data = await getStoreSetting(params);
 
   return (
     <div className="h-screen font-serif">
@@ -36,7 +28,7 @@ const FrontStoreLayout = async ({ children, params }) => {
   );
 };
 export async function generateMetadata({ params }): Promise<Metadata> {
-  const store = await getData(params);
+  const store = await getStoreSetting(params);
   return {
     title: { template: `%s | ${store.name}`, default: store?.name },
     description: `Description`,

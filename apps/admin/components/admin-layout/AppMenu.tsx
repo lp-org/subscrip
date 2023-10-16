@@ -36,6 +36,7 @@ const AppMenu = () => {
             {
               label: "Collection",
               to: `/store/${storeId}/collections`,
+              preventExact: true,
             },
           ],
         },

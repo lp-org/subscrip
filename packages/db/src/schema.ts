@@ -258,6 +258,10 @@ export const collection = pgTable("collection", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
+  status: text("status")
+    .$type<"published" | "draft">()
+    .notNull()
+    .default("draft"),
   storeId: uuid("store_id")
     .notNull()
     .references(() => store.id),

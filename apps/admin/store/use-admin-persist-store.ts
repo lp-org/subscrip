@@ -3,9 +3,10 @@ import { ToastMessage } from "primereact/toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-export type FILTER = "room" | "booking";
 import { produce } from "immer";
 import { FilterMatchMode, FilterOperator } from "primereact/api";
+
+export type FILTER = "room" | "booking" | "collection";
 interface useAdminPersistStoreState {
   tableFilter: Record<FILTER, Partial<DataTableStateEvent> | undefined>;
   setTableFilter: (key: FILTER, f: DataTableStateEvent) => void;
@@ -42,7 +43,6 @@ export const useAdminPersistStore = create<useAdminPersistStoreState>()(
       setTableFilter: (key, f) =>
         set(
           produce((state) => {
-            console.log(f);
             // return { tableFilter: { ...state.tableFilter, [key]: f } };
             state.tableFilter[key] = { ...f };
           })

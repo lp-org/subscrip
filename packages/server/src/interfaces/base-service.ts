@@ -1,6 +1,11 @@
 import { PgJsDatabaseType, room, store } from "db";
 import { Column, SQL, Table, and, eq, getTableName, sql } from "drizzle-orm";
-import { PgTableFn } from "drizzle-orm/pg-core";
+import {
+  AnyPgSelect,
+  PgSelect,
+  PgSelectQueryBuilder,
+  PgTableFn,
+} from "drizzle-orm/pg-core";
 import { whereEqQuery } from "../utils/build-query";
 import { CurrentStore } from "../types";
 import { PageConfig } from "utils-data";
@@ -68,5 +73,17 @@ export abstract class BaseService {
   ) {
     const currentStore = this.currentStore_;
     return whereEqQuery({ ...filter, storeId: currentStore.storeId }, table_);
+  }
+
+  whereByStore(table_: ReturnType<PgTableFn>) {
+    const currentStore = this.currentStore_;
+    return eq(table_.storeId as Column, currentStore.storeId);
+  }
+
+  paginate<T extends AnyPgSelect>(query: T, pageConfig?: PageConfig) {
+    if (pageConfig?.offset !== undefined && pageConfig?.limit !== undefined) {
+      return query.offset(pageConfig?.offset).limit(pageConfig?.limit);
+    }
+    return query;
   }
 }
