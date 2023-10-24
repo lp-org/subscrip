@@ -19,21 +19,32 @@ const CrudDialog = ({
 }: CrudDialogProps) => {
   const productDialogFooter = (
     <>
-      <Button label="Cancel" icon="pi pi-times" text onClick={hideDialog} />
-      <Button label="Save" icon="pi pi-check" text onClick={saveAction} />
+      <Button
+        label="Cancel"
+        icon="pi pi-times"
+        text
+        onClick={hideDialog}
+        type="button"
+      />
+      <Button
+        label="Save"
+        icon="pi pi-check"
+        text
+        onClick={saveAction}
+        type="submit"
+      />
     </>
   );
   return (
     <Dialog
       maximizable
-      maximized
       visible={visible}
-      style={{ width: "450px" }}
       header={header}
       modal
       className="p-fluid"
       footer={productDialogFooter}
       onHide={hideDialog}
+      breakpoints={{ "960px": "75vw", "641px": "100vw" }}
     >
       {children}
     </Dialog>

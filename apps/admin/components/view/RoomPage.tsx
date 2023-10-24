@@ -32,7 +32,7 @@ const RoomPage = () => {
   const [customFilter, setCustomFilter] = useState({});
   const filter = useAdminPersistStore((state) => state.tableFilter.booking);
   const setFilter = useAdminPersistStore((state) => state.setTableFilter);
-  console.log(customFilter);
+
   const { data, refetch } = useQuery({
     queryFn: () => {
       return adminClient.room.list({ ...filter, ...customFilter });

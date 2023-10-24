@@ -129,3 +129,23 @@ export const deleteCollectionRoomDTO = z.object({
 });
 
 export type deleteCollectionRoomType = z.infer<typeof deleteCollectionRoomDTO>;
+
+export const createPricingRuleDTO = z.object({
+  type: z.enum(["percentage", "fixed", "amount"]),
+  value: z.number(),
+  startAt: z.date(),
+  endAt: z.date().nullable().optional(),
+  dayOfWeek: z.array(
+    z.enum([
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ])
+  ),
+});
+
+export type createPricingRuleType = z.infer<typeof createPricingRuleDTO>;

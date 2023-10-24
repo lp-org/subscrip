@@ -247,6 +247,9 @@ export const room = pgTable("room", {
   quantity: integer("quantity").default(0),
   maximumOccupancy: integer("maximum_occupancy").default(0),
   status: text("status").$type<"published" | "draft">().default("draft"),
+  pricingId: uuid("pricing_id").references(() => pricing.id, {
+    onDelete: "cascade",
+  }),
   storeId: uuid("store_id")
     .notNull()
     .references(() => store.id),
@@ -298,32 +301,67 @@ export const roomImagesRelations = relations(roomImages, ({ one }) => ({
 }));
 
 export const roomRelations = relations(room, ({ many, one }) => ({
-  pricings: many(pricing),
   bookings: many(booking),
+  pricing: one(pricing, { fields: [room.pricingId], references: [pricing.id] }),
   store: one(store, { fields: [room.storeId], references: [store.id] }),
   images: many(roomImages),
 }));
 
 export const pricing = pgTable("pricing", {
   id: uuid("id").defaultRandom().primaryKey(),
+
+  name: text("name"),
   price: integer("price").default(0),
-  dayOfWeek: text("day_of_week").$type<
-    | "monday"
-    | "tuesday"
-    | "wednesday"
-    | "thursday"
-    | "friday"
-    | "saturday"
-    | "sunday"
-  >(),
-  date: date("date"),
-  roomId: uuid("room_id").references(() => room.id),
+  status: text("status").$type<"published" | "draft">().default("draft"),
+  storeId: uuid("store_id")
+    .notNull()
+    .references(() => store.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
-export const pricingRelations = relations(pricing, ({ one }) => ({
-  room: one(room, { fields: [pricing.roomId], references: [room.id] }),
+// export const pricingRoom = pgTable("pricing_room", {
+//   pricingId: uuid("pricing_id").references(() => pricing.id, {
+//     onDelete: "cascade",
+//   }),
+//   roomId: uuid("room_id").references(() => room.id, {
+//     onDelete: "cascade",
+//   }),
+// });
+
+export const pricingRule = pgTable("pricing_rule", {
+  type: text("type").$type<"percentage" | "fixed" | "amount">().notNull(),
+  // valueChangeType: text("value_change_type").notNull().$type<"add" | "minus">(),
+  value: integer("value").notNull().default(0),
+  startAt: timestamp("start_at"),
+  endAt: timestamp("end_at"),
+  dayOfWeek:
+    jsonb("day_of_week").$type<
+      (
+        | "monday"
+        | "tuesday"
+        | "wednesday"
+        | "thursday"
+        | "friday"
+        | "saturday"
+        | "sunday"
+      )[]
+    >(),
+  pricingId: uuid("pricing_id")
+    .notNull()
+    .references(() => pricing.id),
+});
+
+export const pricingRelations = relations(pricing, ({ many }) => ({
+  room: many(room),
+  pricingRule: many(pricingRule),
+}));
+
+export const pricingRuleRelations = relations(pricingRule, ({ one }) => ({
+  pricing: one(pricing, {
+    fields: [pricingRule.pricingId],
+    references: [pricing.id],
+  }),
 }));
 
 export const booking = pgTable("booking", {

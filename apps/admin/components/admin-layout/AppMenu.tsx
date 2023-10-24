@@ -45,8 +45,14 @@ const AppMenu = () => {
           icon: "pi pi-fw pi-book",
           to: `/store/${storeId}/bookings`,
         },
+        {
+          label: "Pricing",
+          icon: "pi pi-fw pi-money",
+          to: `/store/${storeId}/pricings`,
+        },
       ],
     },
+
     {
       label: "Setting",
       items: [

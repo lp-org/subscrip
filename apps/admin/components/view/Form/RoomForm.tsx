@@ -24,13 +24,7 @@ import { forEach } from "lodash";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
 
-const RoomForm = ({
-  payload,
-  isLoading,
-}: {
-  payload: Room;
-  isLoading: boolean;
-}) => {
+const RoomForm = ({ payload }: { payload?: Room }) => {
   const params = useParams();
   const id = params.id as string;
   const { adminClient } = useRequest();

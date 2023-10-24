@@ -10,6 +10,7 @@ const CurrencyInput = ({
   currency,
   ...rest
 }: CurrencyInputProps) => {
+  console.log(rest.value);
   return (
     <InputNumber
       {...rest}
@@ -18,7 +19,7 @@ const CurrencyInput = ({
       {...{
         value: rest.value ? rest.value / 100 : 0,
         onValueChange: (e) => {
-          onAmountChange(e.value ? e.value * 100 : 0);
+          onAmountChange(e.value ? parseInt((e.value * 100).toFixed(0)) : 0);
         },
       }}
     />
